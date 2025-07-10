@@ -10,30 +10,25 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
+      # Expose port 3000 on the VPS to the outside world
       - "3000:3000"
     networks:
       - app-network
     depends_on:
       - mongodb
-    environment:
-      # IMPORTANT: These must match your application's needs
-      - MONGODB_URI=mongodb://mongodb:27017/fitness-tracker
-      - NEXTAUTH_URL=http://localhost:3000 # Change this to your domain later
-      - NEXTAUTH_SECRET= # <-- PUT YOUR ACTUAL SECRET HERE
+    env_file:
+      # Tells Docker Compose to load variables from this file
+      - ./.env.production
 
   # MongoDB Database Service
   mongodb:
     container_name: fitness-tracker-db
-    image: mongo:6.0 # Use a specific version
+    image: mongo:6.0
     restart: unless-stopped
     volumes:
       - mongo-data:/data/db
     networks:
       - app-network
-    # You can add environment variables for mongo user/pass here for better security
-    # environment:
-    #   - MONGO_INITDB_ROOT_USERNAME=root
-    #   - MONGO_INITDB_ROOT_PASSWORD=your_secret_password
 
 networks:
   app-network:
