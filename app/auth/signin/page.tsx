@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useState, useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,12 +13,20 @@ import { FaGithub, FaGoogle } from 'react-icons/fa';
 import { toast } from 'sonner';
 
 export default function SignIn() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
 
+  // Add debugging to understand what's happening
+  console.log('[SignIn] Component rendering - Status:', status, 'Session:', !!session);
+
+  // Don't render anything if middleware is redirecting authenticated users
+  // The middleware should handle the redirect, so we just render the form
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));

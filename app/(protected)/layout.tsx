@@ -44,7 +44,11 @@ export default function ProtectedLayout({
 
   // Handle authentication check
   useEffect(() => {
-    if (status === 'loading') return; // Still checking authentication
+    console.log('[ProtectedLayout] Auth check - Status:', status, 'Session:', !!session, 'User ID:', session?.user?.id);
+    if (status === 'loading') {
+      console.log('[ProtectedLayout] Still loading authentication...');
+      return; // Still checking authentication
+    }
     
     if (status === 'unauthenticated' || !session) {
       console.log('[ProtectedLayout] User not authenticated, redirecting to sign-in');
@@ -156,7 +160,8 @@ export default function ProtectedLayout({
   const isLoading = exerciseLoading || scheduledLoading;
   const isInitialized = exerciseInitialized && scheduledInitialized;
   const dataLoadingError = exerciseError || scheduledError;
-  // console.log('error', exerciseError);
+  
+  console.log('[ProtectedLayout] Render state - Status:', status, 'IsLoading:', isLoading, 'IsInitialized:', isInitialized, 'Error:', !!dataLoadingError);
   
   return (
 

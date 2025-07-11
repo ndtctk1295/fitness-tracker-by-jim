@@ -19,7 +19,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 export default function DashboardPage() {
   const { data: session } = useSession();
   const router = useRouter();
-    const { status } = useSession();
+  const { status } = useSession();
+  
+  // Add debugging
+  console.log('[Dashboard] Component rendering - Status:', status, 'Session:', !!session);
+  
   const { exercises, isLoading: exercisesLoading } = useExerciseStore();
   const { 
     preferences, 

@@ -49,8 +49,14 @@ export async function middleware(req: NextRequest) {
         path === protectedPath || path.startsWith(`${protectedPath}/`)
       );
     
-    // 1. Handle public paths - allow access
+    // 1. Handle public paths - but redirect authenticated users away from auth pages
     if (isPublicPath) {
+      // Special case: redirect authenticated users away from auth pages
+      if (token && (path.startsWith('/auth/signin') || path.startsWith('/auth/register'))) {
+        console.log(`[Middleware] Authenticated user accessing auth page ${path}, redirecting to dashboard`);
+        return NextResponse.redirect(new URL('/dashboard', req.nextUrl));
+      }
+      
       console.log(`[Middleware] Allowing access to public path: ${path}`);
       return NextResponse.next();
     }

@@ -110,4 +110,4 @@ User roles:
 
 ## License
 
-MIT
+Jimmy

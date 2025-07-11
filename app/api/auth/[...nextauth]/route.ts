@@ -137,6 +137,12 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       console.log('[NextAuth] Redirect callback - URL:', url, 'BaseURL:', baseUrl);
       
+      // // If already authenticated and going to signin, go to dashboard instead
+      // if (url.includes('/auth/signin')) {
+      //   console.log('[NextAuth] Redirect to signin detected, going to dashboard instead');
+      //   return `${baseUrl}/dashboard`;
+      // }
+      
       // Starts with slash = relative URL from our site
       if (url.startsWith('/')) {
         const fullUrl = `${baseUrl}${url}`;
