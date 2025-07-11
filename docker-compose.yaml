@@ -5,9 +5,7 @@ services:
   # Next.js Application Service
   nextjs-app:
     container_name: fitness-tracker-app
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: nguyentuananh190403/fitness-tracker-by-jim:latest
     restart: unless-stopped
     ports:
       # Expose port 3000 on the VPS to the outside world

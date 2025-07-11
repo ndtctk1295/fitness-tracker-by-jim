@@ -13,9 +13,9 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=base /app/node_modules ./node_modules
 COPY . .
-# Copy your .env.production file here or use build-time args
-# COPY .env.production ./.env.production
-ENV NEXT_TELEMETRY_DISABLED 1
+# Copy the production environment file for build time
+COPY .env.production ./.env.production
+ENV NEXT_TELEMETRY_DISABLED=1
 # Build the Next.js application
 RUN npm run build
 
@@ -23,7 +23,7 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy the standalone output from the builder stage
 COPY --from=builder /app/public ./public
