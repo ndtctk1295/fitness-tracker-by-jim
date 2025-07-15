@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from '@/lib/utils/auth-helpers';
+// Auth options are now directly used via getServerSession from auth-helpers;
 import ScheduledExercise from '@/lib/models/scheduled-exercise';
 import User from '@/lib/models/user';
 import { isAdmin } from '@/middleware/isAdmin';
@@ -17,7 +17,7 @@ export async function GET(
 ) {
   try {
     // Get authenticated user session
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     
     // Check if user is authenticated
     if (!session?.user?.id) {
@@ -89,7 +89,7 @@ export async function DELETE(
 ) {
   try {
     // Get authenticated user session
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     
     // Check if user is authenticated
     if (!session?.user?.id) {

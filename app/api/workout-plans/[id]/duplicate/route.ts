@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from '@/lib/utils/auth-helpers';
 import { authOptions } from '../../../auth/[...nextauth]/route';
 import WorkoutPlanRepository from '../../../../../lib/repositories/workout-plan-repo';
 import { z } from 'zod';
@@ -13,7 +13,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  try {    const session = await getServerSession(authOptions);
+  try {    const session = await getServerSession();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

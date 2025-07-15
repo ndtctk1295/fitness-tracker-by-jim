@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useEffect, useState } from 'react';
+import { signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+;
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,18 +19,25 @@ import { User, LogOut, Settings, UserCircle2 } from 'lucide-react';
 
 export function UserProfileMenu() {
   const { data: session, status } = useSession();
-  const [isLoading, setIsLoading] = useState(false);  const handleSignOut = async () => {
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const handleSignOut = async () => {
     setIsLoading(true);
     try {
       // Use NextAuth's built-in signout redirect mechanism
       await signOut({
-        callbackUrl: '/auth/signin' // NextAuth will handle the redirect
+        callbackUrl: '/auth/signin',
+        
+         // Use callbackUrl instead of redirectTo for NextAuth.js v5
       });
     } catch (error) {
       console.error('Sign out error:', error);
       setIsLoading(false);
     }
   };
+  useEffect( () => {
+    console.log('STATUS:', status)
+  }, [status]);
 
   // If loading
   if (status === 'loading') {
@@ -68,8 +77,8 @@ export function UserProfileMenu() {
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar>
             <AvatarImage 
-              src={session.user.image || ''} 
-              alt={session.user.name || 'User avatar'} 
+              src={session.user?.image || ''} 
+              alt={session.user?.name || 'User avatar'} 
             />
             <AvatarFallback>{userInitials}</AvatarFallback>
           </Avatar>
@@ -78,8 +87,8 @@ export function UserProfileMenu() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{session.user.name}</p>
-            <p className="text-xs leading-none text-muted-foreground">{session.user.email}</p>
+            <p className="text-sm font-medium leading-none">{session.user?.name}</p>
+            <p className="text-xs leading-none text-muted-foreground">{session.user?.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -95,7 +104,7 @@ export function UserProfileMenu() {
             <span>Settings</span>
           </Link>
         </DropdownMenuItem>
-        {session.user.role === 'admin' && (
+        {session?.user?.role === 'admin' && (
           <DropdownMenuItem asChild>
             <Link href="/admin">
               <UserCircle2 className="mr-2 h-4 w-4" />

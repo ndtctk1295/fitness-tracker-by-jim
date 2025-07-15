@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+;
 import { useWorkoutPlanStore } from '@/lib/stores/workout-plan-store';
 import { useScheduledExerciseStore } from '@/lib/stores/scheduled-exercise-store';
 import { useExerciseStore } from '@/lib/stores/exercise-store';

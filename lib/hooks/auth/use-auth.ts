@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, useIsAdmin, useUser } from '@/lib/hooks/auth/use-session';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { redirectTo, navigateTo } from '@/lib/utils/navigation';
@@ -21,13 +21,13 @@ export function useAuth(options: UseAuthOptions = {}) {
   } = options;
 
   const { data: session, status } = useSession();
+  const { isAdmin } = useIsAdmin();
   const router = useRouter();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
 
-  const isExcludedPath = excludePaths.includes(pathname);
+  const isExcludedPath = pathname ? excludePaths.includes(pathname) : false;
   const isAuthenticated = status === 'authenticated' && !!session;
-  const isAdmin = isAuthenticated && session?.user?.role === 'admin';
 
   useEffect(() => {
     // Skip auth check if we're on an excluded path
@@ -50,7 +50,7 @@ export function useAuth(options: UseAuthOptions = {}) {
 
     // For auth-required routes
     if (required && !isAuthenticated) {
-      redirectTo(router, redirectPath, { callbackUrl: pathname });
+      redirectTo(router, redirectPath, { callbackUrl: pathname || undefined });
       return;
     }
 

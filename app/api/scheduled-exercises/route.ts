@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from '@/lib/utils/auth-helpers';
+// Auth options are now directly used via getServerSession from auth-helpers;
 import scheduledExercisesRepo from '@/lib/repositories/scheduled-exercises-repo';
 import { z } from 'zod';
 
@@ -27,7 +27,7 @@ const scheduledExerciseSchema = z.object({
 export async function GET(req: NextRequest) {
   try {
     // Get authenticated user session
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // Get authenticated user session
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },

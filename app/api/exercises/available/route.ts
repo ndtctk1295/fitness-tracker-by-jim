@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from '@/lib/utils/auth-helpers';
+// Auth options are now directly used via getServerSession from auth-helpers;
 import exercisesRepo from '@/lib/repositories/exercises-repo';
 
 /**
@@ -9,7 +9,7 @@ import exercisesRepo from '@/lib/repositories/exercises-repo';
  */
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },

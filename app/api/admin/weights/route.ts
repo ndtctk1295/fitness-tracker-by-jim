@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from '@/lib/utils/auth-helpers';
+// Auth options are now directly used via getServerSession from auth-helpers;
 import weightsRepo from '@/lib/repositories/weights-repo';
 import User from '@/lib/models/user';
 import { isAdmin } from '@/middleware/isAdmin';
@@ -12,7 +12,7 @@ import { isAdmin } from '@/middleware/isAdmin';
 export async function GET(req: NextRequest) {
   try {
     // Get authenticated user session
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     
     // Check if user is authenticated and is an admin
     if (!session?.user?.id) {
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // Get authenticated user session
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     
     // Check if user is authenticated and is an admin
     if (!session?.user?.id) {

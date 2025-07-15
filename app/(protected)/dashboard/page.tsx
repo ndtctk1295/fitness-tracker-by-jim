@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { SessionProvider, useSession } from 'next-auth/react';
 import { format, startOfWeek, addDays, isSameDay } from 'date-fns';
 import { Activity, Calendar, CheckCircle, Dumbbell, LineChart, Settings, Timer, Weight, Heart, Clock } from 'lucide-react';
 import { navigateTo, redirectTo } from '@/lib/utils/navigation';
@@ -16,10 +16,9 @@ import { useScheduledExerciseStore } from '@/lib/stores/scheduled-exercise-store
 import { useTimerStore } from '@/lib/stores/timer-store';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-export default function DashboardPage() {
-  const { data: session } = useSession();
+function Dashboard() {
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const { status } = useSession();
   
   // Add debugging
   console.log('[Dashboard] Component rendering - Status:', status, 'Session:', !!session);
@@ -420,5 +419,14 @@ export default function DashboardPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+// Export a wrapped version of the Dashboard component
+export default function DashboardPage() {
+  return (
+    <SessionProvider>
+      <Dashboard />
+    </SessionProvider>
   );
 }

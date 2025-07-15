@@ -15,7 +15,7 @@ import { WeeklyTemplateStep } from '@/components/workout-plans/wizard/weekly-tem
 export default function EditWorkoutPlanPage() {
   const params = useParams();
   const router = useRouter();
-  const planId = params.id as string;
+  const planId = params?.id as string;
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);  const [editData, setEditData] = useState<{
     name: string;

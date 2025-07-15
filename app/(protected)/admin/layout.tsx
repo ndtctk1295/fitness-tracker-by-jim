@@ -49,9 +49,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="flex space-x-1 p-1">
           {sections.map((section) => {
             const isActive = 
-              section.href === '/admin' 
-                ? pathname === '/admin'
-                : pathname.startsWith(section.href);
+              pathname && (
+                section.href === '/admin' 
+                  ? pathname === '/admin'
+                  : pathname.startsWith(section.href)
+              );
                 
             return (
               <Link

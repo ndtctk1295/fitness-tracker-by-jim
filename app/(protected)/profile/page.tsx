@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+// import { useSession } from '@/lib/hooks/auth/use-session';
 import { useSession } from 'next-auth/react';
 import { redirectTo } from '@/lib/utils/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';

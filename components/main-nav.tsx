@@ -3,7 +3,9 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Calendar, Clock, Dumbbell, FolderOpen, ListChecks, Settings, Shield, Timer, User, Weight, Home, Bell, Package2, History, CalendarDays } from "lucide-react"
-import { useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react';
+
+import { pathnameEquals, pathnameStartsWith } from '@/lib/utils/pathname-helpers'
 import { SidebarMenuButton, Sidebar, SidebarContent, SidebarMenu, SidebarHeader } from "./ui/sidebar"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -19,19 +21,19 @@ export function MainNav() {
       href: "/dashboard",
       label: "Dashboard",
       icon: <Home className="h-5 w-5 mr-2" />,
-      active: pathname === "/dashboard",
+      active: pathnameEquals(pathname, "/dashboard"),
     },
     {
       href: "/calendar",
       label: "Calendar",
       icon: <Calendar className="h-5 w-5 mr-2" />,
-      active: pathname === "/calendar",
+      active: pathnameEquals(pathname, "/calendar"),
     },
     {
       href: "/timer",
       label: "Timer",
       icon: <Clock className="h-5 w-5 mr-2" />,
-      active: pathname === "/timer",
+      active: pathnameEquals(pathname, "/timer"),
     },
     {
       href: "/timer-strategies",
@@ -61,7 +63,7 @@ export function MainNav() {
       href: "/workout-plans",
       label: "Workout Plans",
       icon: <CalendarDays className="h-5 w-5 mr-2" />,
-      active: pathname.startsWith("/workout-plans"),
+      active: pathnameStartsWith(pathname, "/workout-plans"),
     },
     {
       href: "/weights",
@@ -87,7 +89,7 @@ export function MainNav() {
         href: "/admin",
         label: "Admin",
         icon: <Shield className="h-5 w-5 mr-2" />,
-        active: pathname.startsWith("/admin"),
+        active: pathnameStartsWith(pathname, "/admin"),
       }
     ] : []),
   ]

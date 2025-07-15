@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from '@/lib/utils/auth-helpers';
+// Auth options are now directly used via getServerSession from auth-helpers;
 import connectToMongoDB from '@/lib/mongodb';
 import User from '@/lib/models/user';
 
@@ -28,7 +28,7 @@ export async function isAdmin(userIdOrReq: string | NextRequest): Promise<boolea
     
     // Handle middleware request
     const req = userIdOrReq as NextRequest;
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     
     if (!session || !session.user || !session.user.email) {
       return NextResponse.json(

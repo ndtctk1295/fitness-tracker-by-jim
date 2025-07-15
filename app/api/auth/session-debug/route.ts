@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../[...nextauth]/route';
+import { getServerSession } from '@/lib/utils/auth-helpers';
 
 export async function GET(req: NextRequest) {
   try {
     // Get the server session
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     
     // Get all request cookies for debugging
     const cookies = req.cookies;

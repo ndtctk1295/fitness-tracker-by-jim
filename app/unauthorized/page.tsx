@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Shield, Home } from 'lucide-react';
 import { navigateTo } from '@/lib/utils/navigation';
 import { useSession } from 'next-auth/react';
+;
 
 export default function UnauthorizedPage() {
   const router = useRouter();

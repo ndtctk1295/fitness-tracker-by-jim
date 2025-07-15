@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from '@/lib/utils/auth-helpers';
+// Auth options are now directly used via getServerSession from auth-helpers;
 import workoutPlanRepo from '@/lib/repositories/workout-plan-repo';
 import { z } from 'zod';
 import mongoose from 'mongoose';
@@ -64,7 +64,7 @@ export async function GET(
 ) {
   try {
     // Get authenticated user session
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -105,7 +105,7 @@ export async function PUT(
 ) {
   try {
     // Get authenticated user session
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -198,7 +198,7 @@ export async function DELETE(
 ) {
   try {
     // Get authenticated user session
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },

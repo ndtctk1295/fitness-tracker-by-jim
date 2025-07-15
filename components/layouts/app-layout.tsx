@@ -4,6 +4,7 @@ import { MainNav } from '@/components/main-nav';
 import { UserProfileMenu } from '@/components/auth/user-profile-menu';
 import { ModeToggle } from '@/components/theme-toggle';
 import { useSession } from 'next-auth/react';
+;
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Bell, Home, LineChart, Package, Package2, ShoppingCart, Users } from 'lucide-react'; // Example icons
@@ -25,7 +26,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
 
-  const isAuthPage = pathname.startsWith('/auth/');
+  const isAuthPage = pathname ? pathname.startsWith('/auth/') : false;
 
   useEffect(() => {
     setIsMounted(true);

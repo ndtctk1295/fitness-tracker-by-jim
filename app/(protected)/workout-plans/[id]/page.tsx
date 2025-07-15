@@ -32,7 +32,7 @@ import { format } from 'date-fns';
 export default function WorkoutPlanDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const planId = params.id as string;
+  const planId = params?.id as string;
   
   const [isLoading, setIsLoading] = useState(true);
   const [plan, setPlan] = useState<any>(null);

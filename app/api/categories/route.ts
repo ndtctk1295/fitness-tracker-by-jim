@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from '@/lib/utils/auth-helpers';
 import { authOptions } from '../auth/[...nextauth]/route';
 import { verifyApiAuth } from '@/lib/utils/api-auth';
 import { categoriesRepo, usersRepo } from '@/lib/repositories';
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     console.log(`Request headers - x-client-auth: ${clientAuth}, origin: ${requestOrigin}`);
     
     // Check direct session first (bypass verifyApiAuth for debugging)
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     console.log(`Categories API - Direct session check: ${!!session}`);
     
     // Special case: If this is a client request with proper headers, trust it

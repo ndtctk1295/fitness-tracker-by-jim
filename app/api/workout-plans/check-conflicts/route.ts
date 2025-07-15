@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from '@/lib/utils/auth-helpers';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import WorkoutPlan from '../../../../lib/models/workout-plan';
 import mongoose from 'mongoose';
@@ -13,7 +13,7 @@ const checkConflictsSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

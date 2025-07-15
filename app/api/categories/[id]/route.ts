@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from '@/lib/utils/auth-helpers';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import { categoriesRepo, usersRepo } from '@/lib/repositories';
 import mongoose from 'mongoose';
@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session || !session.user || !session.user.email) {      return NextResponse.json(
         { error: 'Unauthorized: You must be logged in' }, 
         { status: 401 }
@@ -53,7 +53,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session || !session.user || !session.user.email) {
       return NextResponse.json(
         { error: 'Unauthorized: You must be logged in' }, 
@@ -114,7 +114,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session || !session.user || !session.user.email) {
       return NextResponse.json(
         { error: 'Unauthorized: You must be logged in' }, 

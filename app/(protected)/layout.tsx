@@ -8,16 +8,18 @@ import { useScheduledExerciseStore } from '@/lib/stores/scheduled-exercise-store
 import { useWorkoutPlanStore } from '@/lib/stores/workout-plan-store';
 import { CircleAlert, Loader2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+// No need for checkSessionStatus anymore
 import { redirectTo } from '@/lib/utils/navigation';
 import { Button } from '@/components/ui/button';
 import { StoreResetHandler } from '@/components/shared/store-reset-handler';
 
-// This layout wraps all protected routes that require authentication
-export default function ProtectedLayout({
+// The inner component that uses authentication
+function ProtectedLayoutContent({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {  const { data: session, status } = useSession();
+}>) {
+  const { data: session, status } = useSession();
   const router = useRouter();
   // Get store state and initialization functions
   const { 
@@ -42,21 +44,26 @@ export default function ProtectedLayout({
     error: workoutPlanError
   } = useWorkoutPlanStore();
 
-  // Handle authentication check
+  // Simple authentication check using useSession
   useEffect(() => {
-    console.log('[ProtectedLayout] Auth check - Status:', status, 'Session:', !!session, 'User ID:', session?.user?.id);
+    console.log('[ProtectedLayout] Auth check - Status:', status, 'Session:', !!session);
+    
+    // The middleware is now handling the redirects, so we only need to check if we're loading
     if (status === 'loading') {
       console.log('[ProtectedLayout] Still loading authentication...');
       return; // Still checking authentication
     }
     
-    if (status === 'unauthenticated' || !session) {
+    // If not loading and not authenticated, redirect (this is a fallback as middleware should handle this)
+    if (status === 'unauthenticated') {
       console.log('[ProtectedLayout] User not authenticated, redirecting to sign-in');
       redirectTo(router, '/auth/signin');
       return;
     }
     
-    console.log('[ProtectedLayout] User authenticated:', session.user?.email);
+    console.log('[ProtectedLayout] User authenticated:', session?.user?.email || 'Unknown user');
+    
+    console.log('[ProtectedLayout] User authenticated:', session?.user?.email);
   }, [status, session, router]);
 
   // Initialize both stores once when the layout mounts and user is authenticated
@@ -185,6 +192,18 @@ export default function ProtectedLayout({
         <StoreResetHandler />
         {/* Error tester component for development */}
       </AppLayout>
+    );
+}
 
+// Wrap the content with SessionProvider
+export default function ProtectedLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <>
+      <ProtectedLayoutContent>{children}</ProtectedLayoutContent>
+    </>
   );
 }

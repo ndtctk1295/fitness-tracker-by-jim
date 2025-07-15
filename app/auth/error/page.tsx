@@ -11,7 +11,7 @@ import { FaExclamationTriangle } from 'react-icons/fa';
 function AuthErrorContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const error = searchParams.get('error');
+  const error = searchParams?.get('error');
 
   // Map error codes to user-friendly messages
   const getErrorMessage = (error: string | null): string => {
@@ -35,7 +35,7 @@ function AuthErrorContent() {
     }
   };
 
-  const errorMessage = getErrorMessage(error);
+  const errorMessage = getErrorMessage(error || null);
 
   return (
     <div className="flex justify-center items-center min-h-screen p-4">

@@ -11,8 +11,39 @@ const nextConfig = {
     unoptimized: true,
   },
   
-  // Production optimizations for database operations
-  serverExternalPackages: ['mongoose', 'bcrypt'],
+  // Configure experimental features
+  // experimental: {
+  //   // Support for server actions
+  //   serverActions: {
+  //     bodySizeLimit: '2mb',
+  //   },
+  //   // Middleware configuration for MongoDB support
+  //   middleware: {
+  //     // This ensures middleware can use MongoDB
+  //     // without Edge Runtime restrictions
+  //     unstable_allowDynamicGlobs: [
+  //       '/api/auth/**/*'
+  //     ],
+  //     unstable_skipMiddlewareUrlNormalize: true,
+  //   },
+  // },
+
+  
+  // Configure webpack to avoid bundling server-only modules in client-side code
+  // webpack: (config, { isServer }) => {
+  //   if (!isServer) {
+  //     // Don't attempt to import these packages on the client side
+  //     config.resolve.alias = {
+  //       ...config.resolve.alias,
+  //       'mongodb': false,
+  //       'mongoose': false,
+  //       '@auth/mongodb-adapter': false,
+  //       'bcrypt': false,
+  //       'crypto': false
+  //     }
+  //   }
+  //   return config;
+  // },
   
   // Performance optimizations
   compress: true,

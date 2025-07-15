@@ -1,72 +1,66 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { signIn, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { FaGithub, FaGoogle } from 'react-icons/fa';
+import { FaGoogle } from 'react-icons/fa';
 import { toast } from 'sonner';
 
 export default function SignIn() {
-  const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
 
-  // Add debugging to understand what's happening
-  console.log('[SignIn] Component rendering - Status:', status, 'Session:', !!session);
-
-  // Don't render anything if middleware is redirecting authenticated users
-  // The middleware should handle the redirect, so we just render the form
-  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  };
+  
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // Use redirect: true to let NextAuth handle the redirect to dashboard
       const result = await signIn('credentials', {
-        redirect: true,
-        callbackUrl: '/dashboard',
+        redirect: false,
         email: formData.email,
         password: formData.password,
+        callbackUrl,
       });
 
-      // This code won't execute if redirect: true is successful
       if (result?.error) {
         toast.error('Invalid email or password');
         setIsLoading(false);
         return;
       }
-
+      
       toast.success('Signed in successfully');
+      router.push(callbackUrl);
     } catch (error) {
       console.error('Sign in error:', error);
       toast.error('Something went wrong');
       setIsLoading(false);
     }
-  };const handleOAuthSignIn = (provider: string) => {
+  };
+  
+  const handleOAuthSignIn = (provider: string) => {
     setIsLoading(true);
-    
-    // For OAuth providers, specify redirect: true to let NextAuth handle the redirect
-    // Redirect directly to dashboard
-    signIn(provider, { 
-      callbackUrl: '/dashboard',
-      redirect: true
+    signIn(provider, {
+      callbackUrl,
     });
   };
-
+  
   return (
     <div className="flex justify-center items-center min-h-screen p-4 mx-auto w-full">
       <Card className="w-full max-w-md">
@@ -110,7 +104,6 @@ export default function SignIn() {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
-
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -120,17 +113,7 @@ export default function SignIn() {
                 <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
             </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <Button
-                variant="outline"
-                type="button"
-                disabled={isLoading}
-                onClick={() => handleOAuthSignIn('github')}
-              >
-                <FaGithub className="mr-2 h-4 w-4" />
-                GitHub
-              </Button>
+            <div className="mt-4 grid grid-cols-1 gap-3">
               <Button
                 variant="outline"
                 type="button"
@@ -142,7 +125,8 @@ export default function SignIn() {
               </Button>
             </div>
           </div>
-        </CardContent>        <CardFooter className="flex justify-center">
+        </CardContent>
+        <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}
             <Button variant="link" className="p-0 h-auto text-primary hover:underline" asChild>

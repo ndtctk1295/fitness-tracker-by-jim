@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from '@/lib/utils/auth-helpers';
+// Auth options are now directly used via getServerSession from auth-helpers;
 
 interface AuthOptions {
   requireAdmin?: boolean;
@@ -37,7 +37,7 @@ export async function verifyApiAuth(
     }
     
     // Get session for normal API requests
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     
     // Check for basic authentication
     if (!session || !session.user) {
