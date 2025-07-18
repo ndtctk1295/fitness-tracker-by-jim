@@ -1,4 +1,5 @@
 # .dockerignore
+.next-authv4-app
 .env
 .env*.local
 .git

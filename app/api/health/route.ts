@@ -5,10 +5,9 @@ import { NextRequest, NextResponse } from 'next/server';
  * Simple health check endpoint that can be used to test the API compatibility layer
  */
 export async function GET(req: NextRequest) {
-  return NextResponse.json({
-    status: 'ok',
-    version: process.env.npm_package_version || '1.0.0',
+  return NextResponse.json({ 
+    status: 'healthy', 
     timestamp: new Date().toISOString(),
-    apiType: 'App Router',
+    env: process.env.NODE_ENV 
   });
 }

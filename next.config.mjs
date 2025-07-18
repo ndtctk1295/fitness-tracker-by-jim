@@ -10,6 +10,20 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push({
+        'mongodb': 'commonjs mongodb',
+        'mongoose': 'commonjs mongoose',
+        'bcrypt': 'commonjs bcrypt',
+        'crypto': 'commonjs crypto',
+      });
+    }
+    return config;
+  },
+    experimental: {
+    serverComponentsExternalPackages: ['mongoose', 'mongodb', '@auth/mongodb-adapter'],
+  },
   
   // Configure experimental features
   // experimental: {

@@ -9,11 +9,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node server.js",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "type-check-no-tests": "node scripts/check-ts-no-tests.js",
-    "fix-ts-auth-imports": "node scripts/fix-ts-auth-imports.js"
+    "fix-ts-auth-imports": "node scripts/fix-ts-auth-imports.js",
+    "docker:build": "docker build -t fitness-tracker-by-jim .",
+    "docker:run": "docker run -p 3000:3000 fitness-tracker-by-jim"
   },
   "dependencies": {
     "@auth/core": "^0.40.0",
