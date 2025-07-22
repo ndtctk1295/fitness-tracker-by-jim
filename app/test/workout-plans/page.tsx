@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Loader2 } from 'lucide-react';
-import { workoutPlanService } from '@/lib/services/workout-plan-service';
+import { workoutPlanService } from '@/lib/services/clients-service/workout-plan-service';
 
 interface TestResult {
   testName: string;

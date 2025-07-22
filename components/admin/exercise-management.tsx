@@ -39,8 +39,8 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/lib/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
-import { exerciseService, Exercise } from '@/lib/services/exercise-service';
-import { categoryService, Category } from '@/lib/services/category-service';
+import { exerciseService, Exercise } from '@/lib/services/clients-service/exercise-service';
+import { categoryService, Category } from '@/lib/services/clients-service/category-service';
 
 interface ExerciseFormData {
   name: string;

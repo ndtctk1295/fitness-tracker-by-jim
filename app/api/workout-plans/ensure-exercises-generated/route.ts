@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { ensureExercisesGenerated } from '@/lib/services/exercise-generation-service';
+import { ensureExercisesGenerated } from '@/lib/services/clients-service/exercise-generation-service';
 import workoutPlanRepo from '@/lib/repositories/workout-plan-repo';
 
 /**

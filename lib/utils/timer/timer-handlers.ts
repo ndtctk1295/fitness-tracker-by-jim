@@ -1,4 +1,4 @@
-import { TimerStrategy } from '@/lib/services/timer-strategy-service';
+import { TimerStrategy } from '@/lib/services/clients-service/timer-strategy-service';
 import { createExpiryTimestamp, playTimerEndSound } from '@/lib/utils/timer';
 
 /**

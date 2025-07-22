@@ -3,10 +3,10 @@
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { useEffect } from 'react';
 
 export default function HomePage() {
   const { status } = useSession();
-
   return (
     <div className="flex min-h-screen items-center justify-center mx-auto w-full p-4">
       <div className="text-center max-w-md">

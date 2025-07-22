@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useWorkoutPlanStore } from '@/lib/stores/workout-plan-store';
 import { useApiToast } from '@/lib/hooks/use-api-toast';
-import { WorkoutPlan } from '@/lib/services/workout-plan-service';
+import { WorkoutPlan } from '@/lib/services/clients-service/workout-plan-service';
 import { BasicInfoStep } from '@/components/workout-plans/wizard/basic-info-step';
 import { ModeAndDatesStep } from '@/components/workout-plans/wizard/mode-and-dates-step';
 import { WeeklyTemplateStep } from '@/components/workout-plans/wizard/weekly-template-step';

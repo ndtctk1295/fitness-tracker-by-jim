@@ -1,8 +1,8 @@
 import { format, addDays, isBefore, isAfter, differenceInDays } from 'date-fns';
-import connectToMongoDB from '../mongodb';
+import connectToMongoDB from '../../mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import { ObjectId } from 'mongodb';
-import { ExerciseGenerationPolicy, ensureDefaultGenerationPolicy } from '../models/exercise-generation-policy';
+import { ExerciseGenerationPolicy, ensureDefaultGenerationPolicy } from '../../models/exercise-generation-policy';
 
 /**
  * Service for automatically generating scheduled exercises from workout plan templates

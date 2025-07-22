@@ -16,7 +16,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { WorkoutPlan } from "@/lib/services/workout-plan-service";
+import { WorkoutPlan } from "@/lib/services/clients-service/workout-plan-service";
 import { useWorkoutPlanStore } from "@/lib/stores/workout-plan-store";
 import { useApiToast } from "@/lib/hooks/use-api-toast";
 

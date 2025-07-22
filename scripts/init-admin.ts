@@ -1,5 +1,5 @@
 import connectToMongoDB from '../lib/mongodb';
-import { createUser } from '../lib/services/user-service';
+import { createUser } from '../lib/services/server-service/user-service';
 
 /**
  * This script creates an admin user in the database
@@ -8,8 +8,8 @@ import { createUser } from '../lib/services/user-service';
  * 2. Run with: npx ts-node ./scripts/init-admin.ts
  */
 
-const ADMIN_EMAIL = 'admin@example.com';
-const ADMIN_PASSWORD = 'admin123456';  // Change this in production!
+const ADMIN_EMAIL = 'admin@gmail.com';
+const ADMIN_PASSWORD = '@dmin!2#4%6';  // Change this in production!
 
 async function initAdmin() {
   try {

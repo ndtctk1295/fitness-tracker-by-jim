@@ -38,7 +38,7 @@ import {
   Shield,
   Loader2
 } from 'lucide-react';
-import { userClientService, StoreUser, CreateUserData, UpdateUserData } from '@/lib/services/user-client-service';
+import { userClientService, StoreUser, CreateUserData, UpdateUserData } from '@/lib/services/clients-service/user-client-service';
 import { useToast } from '@/lib/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 

@@ -2,19 +2,19 @@
 
 import { useState, useEffect } from "react"
 import { Plus, Trash2, Loader2 } from "lucide-react"
-import { toast } from "sonner"
-
+// import { toast } from "sonner"
+import { useToast } from "@/lib/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { WeightPlateModal } from "@/components/weight-plate-modal"
 import { useWeightStore, StoreWeightPlate } from "@/lib/stores/weight-store"
-import { weightPlateService } from "@/lib/services/weight-plate-service"
+import { weightPlateService } from "@/lib/services/clients-service/weight-plate-service"
 
 export default function WeightsPage() {
   const { weights, deleteWeight, weightUnit, setWeightUnit, setWeights } = useWeightStore()
-
+  const {toast} = useToast();
   const [modalOpen, setModalOpen] = useState(false)
   const [editingWeight, setEditingWeight] = useState<StoreWeightPlate | null>(null)
   const [loading, setLoading] = useState(true)
@@ -42,7 +42,11 @@ export default function WeightsPage() {
         }
       } catch (error) {
         console.error('Error fetching weight plates:', error)
-        toast.error('Failed to load your weight plates')
+        toast({
+          title: 'Error',
+          description: 'Failed to load weight plates',
+          variant: 'destructive',
+        })
       } finally {
         setLoading(false)
       }
@@ -71,11 +75,19 @@ export default function WeightsPage() {
         
         // Delete from local store
         deleteWeight(id)
-        
-        toast.success('Weight plate deleted successfully')
+
+        toast({
+          title: 'Success',
+          description: 'Weight plate deleted successfully',
+          variant: 'default',
+        })
       } catch (error) {
         console.error('Error deleting weight plate:', error)
-        toast.error('Failed to delete weight plate')
+        toast({
+          title: 'Error',
+          description: 'Failed to delete weight plate',
+          variant: 'destructive',
+        })
       } finally {
         setSubmitting(false)
       }

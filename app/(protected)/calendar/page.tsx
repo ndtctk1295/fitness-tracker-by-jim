@@ -23,18 +23,19 @@ import { LoadingOverlay } from "@/components/calendar/loading-overlay";
 
 import { useExerciseStore } from "@/lib/stores/exercise-store";
 import { useScheduledExerciseStoreWithGeneration } from "@/lib/stores/scheduled-exercise-store";
-import { scheduledExerciseService } from "@/lib/services/scheduled-exercise-service";
+import { scheduledExerciseService } from "@/lib/services/clients-service/scheduled-exercise-service";
 import { useWorkoutPlanStore } from "@/lib/stores/workout-plan-store";
 import { useCalendarStore, useCalendarData } from "@/lib/stores/calendar-store";
 import { useUserExercisePreferenceStore } from "@/lib/stores/user-exercise-preference-store";
 import { useApiToast } from "@/lib/hooks/use-api-toast";
 import { isDateInSameWeek } from "@/lib/utils/calendar/date-utils";
 import { categorizeExercises } from "@/lib/utils/calendar/exercise-utils";
+import { useToast } from "@/lib/hooks/use-toast";
 
 export default function CalendarPage() {
   // Hooks
   const { showErrorToast, showSuccessToast } = useApiToast();
-
+  const { toast } = useToast();
   // Access store state and actions
   const {
     exercises,
@@ -231,6 +232,11 @@ export default function CalendarPage() {
     try {
       await rescheduleExercise(exerciseId, newDate, scope);
       showSuccessToast("Exercise rescheduled successfully");
+      // toast({
+      //   title: "Exercise Rescheduled",
+      //   description: `Exercise moved to ${newDate}`,
+      //   variant: "default",
+      // })
     } catch (error: any) {
       showErrorToast(
         "Failed to reschedule exercise",

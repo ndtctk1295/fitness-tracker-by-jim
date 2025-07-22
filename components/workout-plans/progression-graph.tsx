@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { format, subDays, eachDayOfInterval, isSameDay } from "date-fns";
-import { WorkoutPlan } from "@/lib/services/workout-plan-service";
+import { WorkoutPlan } from "@/lib/services/clients-service/workout-plan-service";
 import { useScheduledExerciseStore } from "@/lib/stores/scheduled-exercise-store";
 import { useExerciseStore } from "@/lib/stores/exercise-store";
 

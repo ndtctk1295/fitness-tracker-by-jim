@@ -2,8 +2,8 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { categoryService } from '@/lib/services/category-service';
-import { exerciseService } from '@/lib/services/exercise-service';
+import { categoryService } from '@/lib/services/clients-service/category-service';
+import { exerciseService } from '@/lib/services/clients-service/exercise-service';
 import React from 'react';
 import { Category, Exercise, StoreCategory, StoreExercise } from '@/lib/types';
 

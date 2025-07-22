@@ -30,7 +30,7 @@ import { useToast } from "@/lib/hooks/use-toast";
 import {
   timerStrategyService,
   TimerStrategy,
-} from "@/lib/services/timer-strategy-service";
+} from "@/lib/services/clients-service/timer-strategy-service";
 import {
   createExpiryTimestamp,
   testSound,

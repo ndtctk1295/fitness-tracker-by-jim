@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useExerciseStore } from "@/lib/stores/exercise-store";
 import { Exercise } from "@/lib/types";
-import { WorkoutPlan } from "@/lib/services/workout-plan-service";
+import { WorkoutPlan } from "@/lib/services/clients-service/workout-plan-service";
 
 interface WeeklyScheduleGridProps {
   workoutPlan: WorkoutPlan;

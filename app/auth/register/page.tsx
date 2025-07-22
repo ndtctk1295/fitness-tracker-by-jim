@@ -1,14 +1,14 @@
 'use client';
-
+import axios from 'axios';
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
 import { signIn } from 'next-auth/react';
-
+import { useToast } from '@/lib/hooks/use-toast';
 interface RegisterFormData {
   name: string;
   email: string;
@@ -24,6 +24,7 @@ export default function Register() {
     password: '',
     confirmPassword: '',
   });
+  const {toast} = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,46 +36,104 @@ export default function Register() {
     
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast({
+        title: 'Error',
+        description: 'Passwords do not match',
+        variant: 'destructive',
+      })
       return;
     }
 
     if (formData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast({
+        title: 'Error',
+        description: 'Password must be at least 6 characters long',
+        variant: 'destructive',
+      });
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
+      const response = await axios.post('/api/auth/register', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      }, {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: formData.name,
+      });
+
+      const data = response.data;
+      console.log('Registration response:', data);
+      
+      if (data.success) {
+        toast({
+          title: 'Success',
+          description: 'Registration successful! Signing you in...',
+          variant: 'default',
+        });
+        
+        // Auto sign in after registration using NextAuth's redirect mechanism
+        await signIn('credentials', {
           email: formData.email,
           password: formData.password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
-      }      toast.success('Registration successful! Signing you in...');
-      
-      // Auto sign in after registration using NextAuth's redirect mechanism
-      await signIn('credentials', {
-        email: formData.email,
-        password: formData.password,
-        callbackUrl: '/dashboard', // NextAuth will redirect here on success
-        redirect: true, // Let NextAuth handle the redirect
-      });
+          callbackUrl: '/dashboard', // NextAuth will redirect here on success
+          redirect: true, // Let NextAuth handle the redirect
+        });
+      }
     } catch (error: any) {
       console.error('Registration error:', error);
-      toast.error(error.message || 'Registration failed');
+      
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+        
+        if (errorData.errors) {
+          // Handle validation errors (400 status) - detailed field validation
+          const validationMessages = errorData.errors.map((err: any) => err.message).join('\n• ');
+          toast({
+            title: 'Validation Error',
+            description: `Please fix the following issues:\n• ${validationMessages}`,
+            variant: 'destructive',
+          });
+        } else if (errorData.error) {
+          // Handle specific errors like duplicate email (409 status) or other server errors
+          let title = 'Registration Failed';
+          
+          // Customize title based on error code if available
+          if (errorData.code === 'EMAIL_EXISTS') {
+            title = 'Email Already Registered';
+          } else if (errorData.code === 'DATABASE_ERROR') {
+            title = 'Database Connection Error';
+          }
+          
+          toast({
+            title: title,
+            description: errorData.error,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Registration Failed',
+            description: 'An unexpected error occurred. Please try again.',
+            variant: 'destructive',
+          });
+        }
+      } else if (error.code === 'ERR_NETWORK') {
+        toast({
+          title: 'Network Error',
+          description: 'Unable to connect to the server. Please check your internet connection and try again.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Registration Failed',
+          description: error.message || 'An unexpected error occurred. Please try again.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsLoading(false);
     }

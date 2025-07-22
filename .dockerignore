@@ -3,6 +3,7 @@
 .env*.local
 .git
 .next
+.logs
 node_modules
 npm-debug.log
 README.md

@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import User, { UserDocument } from '../models/user';
+import User, { UserDocument } from '../../models/user';
 import { UserResponse } from '@/lib/types';
 import connectToMongoDB from '@/lib/mongodb';
 

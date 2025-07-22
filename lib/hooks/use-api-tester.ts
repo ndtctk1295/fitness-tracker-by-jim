@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { scheduledExerciseService } from '@/lib/services/scheduled-exercise-service';
+import { scheduledExerciseService } from '@/lib/services/clients-service/scheduled-exercise-service';
 import { useToast } from '@/lib/hooks/use-toast';
 
 /**

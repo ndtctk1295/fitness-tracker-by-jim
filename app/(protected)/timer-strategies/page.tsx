@@ -35,7 +35,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { formatTime } from "@/lib/stores/timer-store"
-import { timerStrategyService, TimerStrategy } from "@/lib/services/timer-strategy-service"
+import { timerStrategyService, TimerStrategy } from "@/lib/services/clients-service/timer-strategy-service"
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog"
 
 const timerStrategySchema = z.object({

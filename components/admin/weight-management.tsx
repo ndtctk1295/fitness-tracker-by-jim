@@ -9,7 +9,8 @@ import {
   Save,
   X,
 } from 'lucide-react';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
+import { useToast } from '@/lib/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,7 +41,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { weightPlateService } from '@/lib/services/weight-plate-service';
+import { weightPlateService } from '@/lib/services/clients-service/weight-plate-service';
 
 // Types for the admin component
 interface AdminWeightPlate {
@@ -54,6 +55,7 @@ interface AdminWeightPlate {
 }
 
 export function WeightManagement() {
+  const { toast } = useToast();
   const [weights, setWeights] = useState<AdminWeightPlate[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -79,7 +81,11 @@ export function WeightManagement() {
       const data = await response.json();
       setWeights(data);
     } catch (error) {
-      toast.error('Failed to load weights');
+      toast({
+        title: 'Error',
+        description: 'Failed to load weights',
+        variant: 'destructive',
+      });
       console.error('Error loading weights:', error);
     } finally {
       setLoading(false);
@@ -119,7 +125,11 @@ export function WeightManagement() {
     try {
       setSubmitting(true);
       if (!formData.value || !formData.color || !formData.userId) {
-        toast.error('Value, color, and user ID are required');
+        toast({
+          title: 'Error',
+          description: 'Value, color, and user ID are required',
+          variant: 'destructive',
+        });
         return;
       }
 
@@ -131,7 +141,11 @@ export function WeightManagement() {
       if (currentWeight) {
         // Update existing weight plate
         await weightPlateService.update(currentWeight._id, weightData);
-        toast.success('Weight plate updated successfully');
+        toast({
+          title: 'Success',
+          description: 'Weight plate updated successfully',
+          variant: 'default',
+        });
       } else {
         // Create new weight plate (for a specific user)
         // For admin, we'll need a different API endpoint or parameter
@@ -145,13 +159,21 @@ export function WeightManagement() {
             userId: formData.userId,
           }),
         });
-        toast.success('Weight plate created successfully');
+        toast({
+          title: 'Success',
+          description: 'Weight plate created successfully',
+          variant: 'default',
+        });
       }
 
       setIsDialogOpen(false);
       loadWeights();
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'An error occurred');
+      toast({
+        title: 'Error',
+        description: error.response?.data?.error || 'An error occurred',
+        variant: 'destructive',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -171,12 +193,20 @@ export function WeightManagement() {
       await fetch(`/api/admin/weights/${deletingWeightId}`, {
         method: 'DELETE',
       });
-      
-      toast.success('Weight plate deleted successfully');
+
+      toast({
+        title: 'Success',
+        description: 'Weight plate deleted successfully',
+        variant: 'default',
+      });
       setIsDeleteDialogOpen(false);
       loadWeights();
     } catch (error) {
-      toast.error('Failed to delete weight plate');
+      toast({
+        title: 'Error',
+        description: 'Failed to delete weight plate',
+        variant: 'destructive',
+      });
     } finally {
       setSubmitting(false);
     }

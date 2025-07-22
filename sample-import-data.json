@@ -1,0 +1,127 @@
+{
+  "categories": [
+    {
+      "name": "Strength Training",
+      "color": "#ef4444",
+      "description": "Exercises focused on building muscle strength and power"
+    },
+    {
+      "name": "Cardio",
+      "color": "#3b82f6",
+      "description": "Cardiovascular exercises for heart health and endurance"
+    },
+    {
+      "name": "Flexibility",
+      "color": "#10b981",
+      "description": "Stretching and mobility exercises"
+    }
+  ],
+  "exercises": [
+    {
+      "name": "Push-ups",
+      "categoryName": "Strength Training",
+      "description": "Classic bodyweight exercise for upper body strength",
+      "difficulty": "beginner",
+      "muscleGroups": ["chest", "shoulders", "triceps", "core"],
+      "equipment": [],
+      "instructions": [
+        "Start in a plank position with hands slightly wider than shoulders",
+        "Keep your body in a straight line from head to heels",
+        "Lower your body until your chest nearly touches the floor",
+        "Push back up to the starting position",
+        "Maintain control throughout the movement"
+      ],
+      "tips": [
+        "Keep your core engaged throughout the movement",
+        "Don't let your hips sag or pike up",
+        "Start with knee push-ups if standard push-ups are too difficult"
+      ],
+      "isActive": true
+    },
+    {
+      "name": "Burpees",
+      "categoryName": "Cardio",
+      "description": "Full-body high-intensity exercise combining squat, plank, and jump",
+      "difficulty": "intermediate",
+      "muscleGroups": ["full body", "legs", "core", "shoulders"],
+      "equipment": [],
+      "instructions": [
+        "Start standing with feet shoulder-width apart",
+        "Squat down and place hands on the floor",
+        "Jump feet back into a plank position",
+        "Perform a push-up (optional)",
+        "Jump feet back to squat position",
+        "Explosively jump up with arms overhead"
+      ],
+      "tips": [
+        "Focus on form over speed",
+        "Land softly to protect your joints",
+        "Modify by stepping back instead of jumping"
+      ],
+      "isActive": true
+    },
+    {
+      "name": "Downward Dog",
+      "categoryName": "Flexibility",
+      "description": "Yoga pose that stretches the hamstrings, calves, and shoulders",
+      "difficulty": "beginner",
+      "muscleGroups": ["hamstrings", "calves", "shoulders", "back"],
+      "equipment": ["yoga mat"],
+      "instructions": [
+        "Start on hands and knees in table-top position",
+        "Tuck toes under and lift hips up and back",
+        "Straighten legs and press heels toward the floor",
+        "Create an inverted V-shape with your body",
+        "Hold the position and breathe deeply"
+      ],
+      "tips": [
+        "Keep a slight bend in knees if hamstrings are tight",
+        "Press firmly through your hands",
+        "Keep your head relaxed between your arms"
+      ],
+      "isActive": true
+    },
+    {
+      "name": "Squats",
+      "categoryName": "Strength Training",
+      "description": "Fundamental lower body exercise targeting glutes and quadriceps",
+      "difficulty": "beginner",
+      "muscleGroups": ["glutes", "quadriceps", "hamstrings", "core"],
+      "equipment": [],
+      "instructions": [
+        "Stand with feet shoulder-width apart, toes slightly pointed out",
+        "Lower your body by pushing hips back and bending knees",
+        "Keep chest up and knees tracking over toes",
+        "Lower until thighs are parallel to the floor",
+        "Push through heels to return to starting position"
+      ],
+      "tips": [
+        "Keep your weight on your heels",
+        "Don't let knees cave inward",
+        "Start with bodyweight before adding resistance"
+      ],
+      "isActive": true
+    },
+    {
+      "name": "Jumping Jacks",
+      "categoryName": "Cardio",
+      "description": "Simple cardio exercise that gets your heart rate up",
+      "difficulty": "beginner",
+      "muscleGroups": ["legs", "shoulders", "core"],
+      "equipment": [],
+      "instructions": [
+        "Start standing with feet together and arms at sides",
+        "Jump while spreading feet to shoulder-width",
+        "Simultaneously raise arms overhead",
+        "Jump back to starting position",
+        "Repeat in a rhythmic motion"
+      ],
+      "tips": [
+        "Land softly on the balls of your feet",
+        "Keep a steady rhythm",
+        "Modify by stepping side to side instead of jumping"
+      ],
+      "isActive": true
+    }
+  ]
+}

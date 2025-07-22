@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { scheduledExerciseService } from '@/lib/services/scheduled-exercise-service';
+import { scheduledExerciseService } from '@/lib/services/clients-service/scheduled-exercise-service';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import React from 'react';
 import { ScheduledExercise } from '@/lib/types';

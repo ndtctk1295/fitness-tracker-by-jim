@@ -24,20 +24,52 @@ interface ExerciseFiltersProps {
   onClearFilters: () => void
 }
 
-// Static filter options based on the enhanced exercise model
-const DIFFICULTY_OPTIONS = ['Beginner', 'Intermediate', 'Advanced', 'Expert']
+// Static filter options based on the actual exercise data
+const DIFFICULTY_OPTIONS = [
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'advanced', label: 'Advanced' }
+]
 
 const MUSCLE_GROUP_OPTIONS = [
-  'Chest', 'Back', 'Shoulders', 'Arms', 'Biceps', 'Triceps', 
-  'Forearms', 'Core', 'Abs', 'Legs', 'Quadriceps', 'Hamstrings', 
-  'Calves', 'Glutes', 'Full Body', 'Cardio'
+  { value: 'chest', label: 'Chest' },
+  { value: 'back', label: 'Back' },
+  { value: 'shoulders', label: 'Shoulders' },
+  { value: 'arms', label: 'Arms' },
+  { value: 'biceps', label: 'Biceps' },
+  { value: 'triceps', label: 'Triceps' },
+  { value: 'core', label: 'Core' },
+  { value: 'quadriceps', label: 'Quadriceps' },
+  { value: 'hamstrings', label: 'Hamstrings' },
+  { value: 'glutes', label: 'Glutes' },
+  { value: 'calves', label: 'Calves' },
+  { value: 'legs', label: 'Legs' },
+  { value: 'lats', label: 'Lats' },
+  { value: 'rhomboids', label: 'Rhomboids' },
+  { value: 'upper back', label: 'Upper Back' },
+  { value: 'middle back', label: 'Middle Back' },
+  { value: 'lower back', label: 'Lower Back' }
 ]
 
 const EQUIPMENT_OPTIONS = [
-  'None (Bodyweight)', 'Dumbbells', 'Barbell', 'Kettlebells', 
-  'Resistance Bands', 'Pull-up Bar', 'Bench', 'Cable Machine', 
-  'Smith Machine', 'Leg Press', 'Cardio Equipment', 'Medicine Ball', 
-  'Stability Ball', 'TRX/Suspension', 'Machines'
+  { value: '', label: 'Bodyweight (No Equipment)' },
+  { value: 'barbell', label: 'Barbell' },
+  { value: 'dumbbells', label: 'Dumbbells' },
+  { value: 'dumbbell', label: 'Dumbbell' },
+  { value: 'bench', label: 'Bench' },
+  { value: 'pull‑up bar', label: 'Pull-up Bar' },
+  { value: 'dip bars', label: 'Dip Bars' },
+  { value: 'leg press machine', label: 'Leg Press Machine' },
+  { value: 'lat pulldown machine', label: 'Lat Pulldown Machine' },
+  { value: 'seated row machine', label: 'Seated Row Machine' },
+  { value: 'hyperextension bench', label: 'Hyperextension Bench' },
+  { value: 'running shoes', label: 'Running Shoes' },
+  { value: 'stationary bike or road bike', label: 'Bike' },
+  { value: 'jump rope', label: 'Jump Rope' },
+  { value: 'rowing machine', label: 'Rowing Machine' },
+  { value: 'elliptical machine', label: 'Elliptical Machine' },
+  { value: 'stair climber', label: 'Stair Climber' },
+  { value: 'plyo box', label: 'Plyo Box' }
 ]
 
 export function ExerciseFilters({ 
@@ -149,17 +181,17 @@ export function ExerciseFilters({
                 </Label>
                 <div className="space-y-2 max-h-32 overflow-y-auto">
                   {DIFFICULTY_OPTIONS.map((difficulty) => (
-                    <div key={difficulty} className="flex items-center space-x-2">
+                    <div key={difficulty.value} className="flex items-center space-x-2">
                       <Checkbox
-                        id={`difficulty-${difficulty}`}
-                        checked={filters.difficulty.includes(difficulty)}
-                        onCheckedChange={() => toggleArrayFilter('difficulty', difficulty)}
+                        id={`difficulty-${difficulty.value}`}
+                        checked={filters.difficulty.includes(difficulty.value)}
+                        onCheckedChange={() => toggleArrayFilter('difficulty', difficulty.value)}
                       />
                       <Label 
-                        htmlFor={`difficulty-${difficulty}`}
+                        htmlFor={`difficulty-${difficulty.value}`}
                         className="text-sm font-normal cursor-pointer"
                       >
-                        {difficulty}
+                        {difficulty.label}
                       </Label>
                     </div>
                   ))}
@@ -178,17 +210,17 @@ export function ExerciseFilters({
                 </Label>
                 <div className="space-y-2 max-h-32 overflow-y-auto">
                   {MUSCLE_GROUP_OPTIONS.map((muscleGroup) => (
-                    <div key={muscleGroup} className="flex items-center space-x-2">
+                    <div key={muscleGroup.value} className="flex items-center space-x-2">
                       <Checkbox
-                        id={`muscle-${muscleGroup}`}
-                        checked={filters.muscleGroups.includes(muscleGroup)}
-                        onCheckedChange={() => toggleArrayFilter('muscleGroups', muscleGroup)}
+                        id={`muscle-${muscleGroup.value}`}
+                        checked={filters.muscleGroups.includes(muscleGroup.value)}
+                        onCheckedChange={() => toggleArrayFilter('muscleGroups', muscleGroup.value)}
                       />
                       <Label 
-                        htmlFor={`muscle-${muscleGroup}`}
+                        htmlFor={`muscle-${muscleGroup.value}`}
                         className="text-sm font-normal cursor-pointer"
                       >
-                        {muscleGroup}
+                        {muscleGroup.label}
                       </Label>
                     </div>
                   ))}
@@ -207,17 +239,17 @@ export function ExerciseFilters({
                 </Label>
                 <div className="space-y-2 max-h-32 overflow-y-auto">
                   {EQUIPMENT_OPTIONS.map((equipment) => (
-                    <div key={equipment} className="flex items-center space-x-2">
+                    <div key={equipment.value} className="flex items-center space-x-2">
                       <Checkbox
-                        id={`equipment-${equipment}`}
-                        checked={filters.equipment.includes(equipment)}
-                        onCheckedChange={() => toggleArrayFilter('equipment', equipment)}
+                        id={`equipment-${equipment.value}`}
+                        checked={filters.equipment.includes(equipment.value)}
+                        onCheckedChange={() => toggleArrayFilter('equipment', equipment.value)}
                       />
                       <Label 
-                        htmlFor={`equipment-${equipment}`}
+                        htmlFor={`equipment-${equipment.value}`}
                         className="text-sm font-normal cursor-pointer"
                       >
-                        {equipment}
+                        {equipment.label}
                       </Label>
                     </div>
                   ))}
@@ -240,35 +272,44 @@ export function ExerciseFilters({
                     </Badge>
                   )}
                   
-                  {filters.difficulty.map((difficulty) => (
-                    <Badge key={difficulty} variant="secondary" className="flex items-center gap-1">
-                      {difficulty}
-                      <X 
-                        className="h-3 w-3 cursor-pointer" 
-                        onClick={() => toggleArrayFilter('difficulty', difficulty)}
-                      />
-                    </Badge>
-                  ))}
+                  {filters.difficulty.map((difficulty) => {
+                    const difficultyOption = DIFFICULTY_OPTIONS.find(opt => opt.value === difficulty);
+                    return (
+                      <Badge key={difficulty} variant="secondary" className="flex items-center gap-1">
+                        {difficultyOption?.label || difficulty}
+                        <X 
+                          className="h-3 w-3 cursor-pointer" 
+                          onClick={() => toggleArrayFilter('difficulty', difficulty)}
+                        />
+                      </Badge>
+                    );
+                  })}
                   
-                  {filters.muscleGroups.map((muscle) => (
-                    <Badge key={muscle} variant="secondary" className="flex items-center gap-1">
-                      {muscle}
-                      <X 
-                        className="h-3 w-3 cursor-pointer" 
-                        onClick={() => toggleArrayFilter('muscleGroups', muscle)}
-                      />
-                    </Badge>
-                  ))}
+                  {filters.muscleGroups.map((muscle) => {
+                    const muscleOption = MUSCLE_GROUP_OPTIONS.find(opt => opt.value === muscle);
+                    return (
+                      <Badge key={muscle} variant="secondary" className="flex items-center gap-1">
+                        {muscleOption?.label || muscle}
+                        <X 
+                          className="h-3 w-3 cursor-pointer" 
+                          onClick={() => toggleArrayFilter('muscleGroups', muscle)}
+                        />
+                      </Badge>
+                    );
+                  })}
                   
-                  {filters.equipment.map((equip) => (
-                    <Badge key={equip} variant="secondary" className="flex items-center gap-1">
-                      {equip}
-                      <X 
-                        className="h-3 w-3 cursor-pointer" 
-                        onClick={() => toggleArrayFilter('equipment', equip)}
-                      />
-                    </Badge>
-                  ))}
+                  {filters.equipment.map((equip) => {
+                    const equipmentOption = EQUIPMENT_OPTIONS.find(opt => opt.value === equip);
+                    return (
+                      <Badge key={equip} variant="secondary" className="flex items-center gap-1">
+                        {equipmentOption?.label || equip || 'Bodyweight'}
+                        <X 
+                          className="h-3 w-3 cursor-pointer" 
+                          onClick={() => toggleArrayFilter('equipment', equip)}
+                        />
+                      </Badge>
+                    );
+                  })}
                 </div>
               </div>
             )}

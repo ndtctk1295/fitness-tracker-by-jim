@@ -343,6 +343,42 @@ export interface ExerciseOrderState {
 }
 
 // =============================================================================
+// IMPORT INTERFACES
+// =============================================================================
+
+export interface CategoryImportData {
+  name: string;
+  color: string; // Hex color code (e.g., "#ff6b6b")
+  description?: string;
+}
+
+export interface ExerciseImportData {
+  name: string;
+  categoryName: string; // Reference to category by name, not ID
+  description?: string;
+  imageUrl?: string;
+  isActive?: boolean; // Defaults to true if not provided
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  muscleGroups: string[]; // Array of muscle group names
+  equipment?: string[]; // Array of equipment names
+  instructions: string[]; // Step-by-step instructions
+  tips?: string[]; // Optional tips for proper form
+}
+
+export interface ImportData {
+  categories: CategoryImportData[];
+  exercises: ExerciseImportData[];
+}
+
+export interface ImportResult {
+  success: boolean;
+  message: string;
+  categoriesCreated: number;
+  exercisesCreated: number;
+  errors?: string[];
+}
+
+// =============================================================================
 // COMPONENT PROP INTERFACES
 // =============================================================================
 

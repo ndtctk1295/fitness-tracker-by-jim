@@ -5,7 +5,7 @@ import { useExerciseStore } from '@/lib/stores/exercise-store';
 import { useScheduledExerciseStore } from '@/lib/stores/scheduled-exercise-store';
 import { useToast } from '@/lib/hooks/use-toast';
 import { format } from 'date-fns';
-import { scheduledExerciseService } from '@/lib/services/scheduled-exercise-service';
+import { scheduledExerciseService } from '@/lib/services/clients-service/scheduled-exercise-service';
 import { ExerciseTemplate } from '@/lib/types';
 
 /**

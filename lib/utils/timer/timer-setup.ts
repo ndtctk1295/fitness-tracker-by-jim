@@ -1,4 +1,4 @@
-import { TimerStrategy, timerStrategyService } from '@/lib/services/timer-strategy-service';
+import { TimerStrategy, timerStrategyService } from '@/lib/services/clients-service/timer-strategy-service';
 import { checkAudioPermission } from '@/lib/utils/timer';
 
 /**

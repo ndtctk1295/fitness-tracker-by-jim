@@ -1,6 +1,6 @@
 'use client';
 
-import type { ScheduledExercise } from '@/lib/services/scheduled-exercise-service';
+import type { ScheduledExercise } from '@/lib/services/clients-service/scheduled-exercise-service';
 
 /**
  * Validation error interface

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ExerciseGenerationPolicy } from '../models/exercise-generation-policy';
+import { ExerciseGenerationPolicy } from '../../models/exercise-generation-policy';
 
 // Types for workout plan operations
 export interface WorkoutPlan {

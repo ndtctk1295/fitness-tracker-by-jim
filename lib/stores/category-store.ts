@@ -2,7 +2,7 @@
 
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import { categoryService } from '@/lib/services/category-service'
+import { categoryService } from '@/lib/services/clients-service/category-service'
 import { Category, CategoryState } from '@/lib/types'
 
 export const useCategoryStore = create<CategoryState>()(

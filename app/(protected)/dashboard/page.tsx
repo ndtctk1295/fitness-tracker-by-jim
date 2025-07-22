@@ -1,5 +1,7 @@
 'use client';
 
+// import { getServerSession } from 'next-auth';
+// import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -15,12 +17,9 @@ import { useUserExercisePreferenceStore } from '@/lib/stores/user-exercise-prefe
 import { useScheduledExerciseStore } from '@/lib/stores/scheduled-exercise-store';
 import { useTimerStore } from '@/lib/stores/timer-store';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
 export default function DashboardPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const { status } = useSession();
-  
   // Add debugging
   console.log('[Dashboard] Component rendering - Status:', status, 'Session:', !!session);
   
@@ -76,7 +75,7 @@ export default function DashboardPage() {
       hasExercises: exercisesForDay.length > 0,
     };
   });
-  
+
   // Get user initials for avatar
   const getUserInitials = () => {
     const name = session?.user?.name || '';
@@ -102,7 +101,6 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-      
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
           <p className="text-muted-foreground">

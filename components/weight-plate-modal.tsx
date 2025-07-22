@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, Save, X, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
-
+// import { toast } from 'sonner'
+import { useToast } from '@/lib/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useWeightStore, StoreWeightPlate } from '@/lib/stores/weight-store'
-import { weightPlateService } from '@/lib/services/weight-plate-service'
+import { weightPlateService } from '@/lib/services/clients-service/weight-plate-service'
 
 interface WeightPlateModalProps {
   open: boolean
@@ -19,7 +19,7 @@ interface WeightPlateModalProps {
 
 export function WeightPlateModal({ open, onOpenChange, editingWeight }: WeightPlateModalProps) {
   const { addWeight, updateWeight, weightUnit } = useWeightStore()
-  
+  const { toast } = useToast()
   const [value, setValue] = useState('')
   const [color, setColor] = useState('#3b82f6')
   const [submitting, setSubmitting] = useState(false)
@@ -45,7 +45,11 @@ export function WeightPlateModal({ open, onOpenChange, editingWeight }: WeightPl
 
   const handleSubmit = async () => {
     if (!value) {
-      toast.error('Please enter a weight value')
+      toast({
+        title: 'Error',
+        description: 'Weight value is required',
+        variant: 'destructive',
+      })
       return
     }
 
@@ -65,7 +69,10 @@ export function WeightPlateModal({ open, onOpenChange, editingWeight }: WeightPl
           color: apiWeight.color,
         })
         
-        toast.success('Weight plate updated successfully')
+        toast({
+          title: 'Weight plate updated successfully',
+          variant: 'default',
+        })
       } else {
         // Create new weight plate
         const apiWeight = await weightPlateService.create({
@@ -82,13 +89,20 @@ export function WeightPlateModal({ open, onOpenChange, editingWeight }: WeightPl
           updatedAt: apiWeight.updatedAt,
         })
         
-        toast.success('Weight plate added successfully')
+        toast({
+          title: 'Weight plate added successfully',
+          variant: 'default',
+        })
       }
       
       resetForm()
     } catch (error) {
       console.error('Error saving weight plate:', error)
-      toast.error(`Failed to ${editingWeight ? 'update' : 'add'} weight plate`)
+      toast({
+        title: 'Error',
+        description: 'Failed to save weight plate',
+        variant: 'destructive',
+      })
     } finally {
       setSubmitting(false)
     }

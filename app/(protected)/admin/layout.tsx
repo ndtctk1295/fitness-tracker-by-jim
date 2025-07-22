@@ -47,7 +47,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     <div className="space-y-6">
       <nav className="flex overflow-auto pb-2">
         <div className="flex space-x-1 p-1">
-          {sections.map((section) => {
+          {/* {sections.map((section) => {
             const isActive = 
               section.href === '/admin' 
                 ? pathname === '/admin'
@@ -66,7 +66,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 {section.label}
               </Link>
             );
-          })}
+          })} */}
         </div>
       </nav>
       

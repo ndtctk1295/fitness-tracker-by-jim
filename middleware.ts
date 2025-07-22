@@ -3,7 +3,7 @@ import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  
+  console.log(`[MIDDLEWARE ENV:] NODE_ENV: ${process.env.NODE_ENV}, NEXTAUTH_SECRET: ${process.env.NEXTAUTH_SECRET}`);
   // Check if this is a NextAuth API route (we want to skip middleware for these routes)
   if (path.startsWith('/api/auth')) {
     console.log('[Middleware] Skipping NextAuth route:', path);
@@ -24,7 +24,8 @@ export async function middleware(req: NextRequest) {
       '/',
       '/auth/signin',
       '/auth/register',
-      '/auth/error',      '/auth/callback',
+      '/auth/error',      
+      '/auth/callback',
       '/auth/verify-request',
       '/unauthorized',
       '/api/health',

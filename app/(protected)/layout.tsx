@@ -43,21 +43,21 @@ export default function ProtectedLayout({
   } = useWorkoutPlanStore();
 
   // Handle authentication check
-  useEffect(() => {
-    console.log('[ProtectedLayout] Auth check - Status:', status, 'Session:', !!session, 'User ID:', session?.user?.id);
-    if (status === 'loading') {
-      console.log('[ProtectedLayout] Still loading authentication...');
-      return; // Still checking authentication
-    }
+  // useEffect(() => {
+  //   console.log('[ProtectedLayout] Auth check - Status:', status, 'Session:', !!session, 'User ID:', session?.user?.id);
+  //   if (status === 'loading') {
+  //     console.log('[ProtectedLayout] Still loading authentication...');
+  //     return; // Still checking authentication
+  //   }
     
-    if (status === 'unauthenticated' || !session) {
-      console.log('[ProtectedLayout] User not authenticated, redirecting to sign-in');
-      redirectTo(router, '/auth/signin');
-      return;
-    }
+  //   if (status === 'unauthenticated' || !session) {
+  //     console.log('[ProtectedLayout] User not authenticated, redirecting to sign-in');
+  //     redirectTo(router, '/auth/signin');
+  //     return;
+  //   }
     
-    console.log('[ProtectedLayout] User authenticated:', session.user?.email);
-  }, [status, session, router]);
+  //   console.log('[ProtectedLayout] User authenticated:', session.user?.email);
+  // }, [status, session, router]);
 
   // Initialize both stores once when the layout mounts and user is authenticated
   useEffect(() => {

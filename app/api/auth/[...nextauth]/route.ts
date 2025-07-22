@@ -5,6 +5,7 @@ import GithubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
 import { MongoClient } from 'mongodb';
 import { usersRepo } from '@/lib/repositories';
+import { validateCredentials } from '@/lib/services/server-service/user-service';
 import { NextAuthOptions } from 'next-auth';
 import NextAuth from 'next-auth/next';
 
@@ -90,30 +91,33 @@ export const authOptions: NextAuthOptions = {
         
         try {
           // Use the user repository for credential validation
-          const user = await usersRepo.validateCredentials(credentials.email, credentials.password);
+          const user = await validateCredentials(credentials.email, credentials.password);
           
           if (!user) {
             console.log('[NextAuth] Invalid credentials for:', credentials.email);
             return null;
           }
 
-          const formattedUser = usersRepo.formatUserResponse(user);
+          // const formattedUser = usersRepo.formatUserResponse(user);
           console.log('[NextAuth] User authenticated successfully:', {
-            id: formattedUser.id,
-            email: formattedUser.email,
-            role: formattedUser.role
+            id: user.id,
+            email: user.email,
+            role: user.role
           });
           
           return {
-            id: formattedUser.id,
-            name: formattedUser.name,
-            email: formattedUser.email,
-            role: formattedUser.role,
-            image: formattedUser.image,
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            image: user.image,
           };
         } catch (error) {
           console.error('[NextAuth] Error during authorization:', error);
           return null;
+          // return new Response('Invalid credentials', {
+          //   status: 401,
+          // });
         }
       }
     }),

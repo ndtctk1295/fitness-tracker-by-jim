@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useEffect } from 'react';
-import { workoutPlanService, WorkoutPlan, DayTemplate, ExerciseTemplate, ConflictDetectionResult, PlanActivationResult } from '@/lib/services/workout-plan-service';
+import { workoutPlanService, WorkoutPlan, DayTemplate, ExerciseTemplate, ConflictDetectionResult, PlanActivationResult } from '@/lib/services/clients-service/workout-plan-service';
 
 // Store-specific types that use 'id' instead of '_id' for frontend compatibility
 interface StoreWorkoutPlan {

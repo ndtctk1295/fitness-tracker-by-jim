@@ -11,10 +11,11 @@ import { CategoryManagement } from '@/components/admin/category-management';
 import { ExerciseManagement } from '@/components/admin/exercise-management';
 import { WeightManagement } from '@/components/admin/weight-management';
 import { TimerStrategyManagement } from '@/components/admin/timer-strategy-management';
-import { userClientService } from '@/lib/services/user-client-service';
-import { categoryService } from '@/lib/services/category-service';
-import { exerciseService } from '@/lib/services/exercise-service';
-import { weightPlateService } from '@/lib/services/weight-plate-service';
+import { ImportManagement } from '@/components/admin/import-management';
+import { userClientService } from '@/lib/services/clients-service/user-client-service';
+import { categoryService } from '@/lib/services/clients-service/category-service';
+import { exerciseService } from '@/lib/services/clients-service/exercise-service';
+import { weightPlateService } from '@/lib/services/clients-service/weight-plate-service';
 
 export default function AdminPage() {
   const { data: session } = useSession();  const [stats, setStats] = useState({
@@ -167,6 +168,7 @@ export default function AdminPage() {
           <TabsTrigger value="exercises">Exercises</TabsTrigger>
           <TabsTrigger value="weights">Weight Plates</TabsTrigger>
           <TabsTrigger value="timerStrategies">Timer Strategies</TabsTrigger>
+          <TabsTrigger value="import">Import Data</TabsTrigger>
         </TabsList>
         <TabsContent value="users" className="space-y-4">
           <Card>
@@ -229,6 +231,19 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
               <TimerStrategyManagement />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="import" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Data Import</CardTitle>
+              <CardDescription>
+                Import categories and exercises from JSON files
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ImportManagement />
             </CardContent>
           </Card>
         </TabsContent>

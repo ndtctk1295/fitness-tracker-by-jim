@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns";
-import { WorkoutPlan } from "@/lib/services/workout-plan-service";
+import { WorkoutPlan } from "@/lib/services/clients-service/workout-plan-service";
 import { useScheduledExerciseStore } from "@/lib/stores/scheduled-exercise-store";
 
 interface PlanStatisticsProps {

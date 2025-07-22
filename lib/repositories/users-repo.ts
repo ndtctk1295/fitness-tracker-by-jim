@@ -116,7 +116,9 @@ class UsersRepository {
   async create(userData: CreateUserData): Promise<UserDocument> {
     try {
       await connectToMongoDB();
-      
+      // if (await User.findOne({ email: userData.email })) {
+      //   throw 'Email "' + userData.email + '" is already taken';
+      // }
       // Hash the password
       if (userData.password) {
         const salt = await bcrypt.genSalt(10);

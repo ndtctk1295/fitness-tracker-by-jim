@@ -10,10 +10,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { FaGithub, FaGoogle } from 'react-icons/fa';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
+import { useToast } from '@/lib/hooks/use-toast';
+// import { useToast } from '@/components/ui/use-toast';
 
 export default function SignIn() {
   const { data: session, status } = useSession();
+  const {toast} = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -22,7 +25,7 @@ export default function SignIn() {
   });
 
   // Add debugging to understand what's happening
-  console.log('[SignIn] Component rendering - Status:', status, 'Session:', !!session);
+  // console.log('[SignIn] Component rendering - Status:', status, 'Session:', !!session);
 
   // Don't render anything if middleware is redirecting authenticated users
   // The middleware should handle the redirect, so we just render the form
@@ -30,33 +33,59 @@ export default function SignIn() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
       // Use redirect: true to let NextAuth handle the redirect to dashboard
       const result = await signIn('credentials', {
-        redirect: true,
-        callbackUrl: '/dashboard',
+        redirect: false,
+        // callbackUrl: '/dashboard',
         email: formData.email,
         password: formData.password,
       });
 
+      console.log('[SignIn] Sign in result:', result);
+
       // This code won't execute if redirect: true is successful
       if (result?.error) {
-        toast.error('Invalid email or password');
+        if( result.error === 'CredentialsSignin') {
+          toast({
+            title: 'Sign in failed',
+            description: 'Invalid email or password',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Sign in failed',
+            description: result.error,
+            variant: 'destructive',
+          });
+        }
         setIsLoading(false);
         return;
       }
 
-      toast.success('Signed in successfully');
-    } catch (error) {
+      toast({
+        title: 'Signed in successfully',
+        description: 'Welcome back!',
+        variant: 'default',
+      });
+      router.push('/dashboard');
+    } 
+    catch (error) {
       console.error('Sign in error:', error);
-      toast.error('Something went wrong');
+      toast({
+        title: 'Sign in error',
+        description: 'Something went wrong',
+        variant: 'destructive',
+      });
       setIsLoading(false);
     }
-  };const handleOAuthSignIn = (provider: string) => {
+  };
+  const handleOAuthSignIn = (provider: string) => {
     setIsLoading(true);
     
     // For OAuth providers, specify redirect: true to let NextAuth handle the redirect
@@ -111,7 +140,7 @@ export default function SignIn() {
             </Button>
           </form>
 
-          <div className="mt-6">
+          {/* <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <Separator className="w-full" />
@@ -141,7 +170,7 @@ export default function SignIn() {
                 Google
               </Button>
             </div>
-          </div>
+          </div> */}
         </CardContent>        <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}

@@ -96,18 +96,34 @@ export function AllExercisesTab({
       )
     }
 
-    // Muscle groups filter
+    // Muscle groups filter (case-insensitive)
     if (filters.muscleGroups.length > 0) {
       result = result.filter((exercise: StoreExercise) => 
-        exercise.muscleGroups?.some((muscle: string) => filters.muscleGroups.includes(muscle))
+        exercise.muscleGroups?.some((muscle: string) => 
+          filters.muscleGroups.some((filterMuscle: string) => 
+            muscle.toLowerCase() === filterMuscle.toLowerCase()
+          )
+        )
       )
     }
 
-    // Equipment filter
+    // Equipment filter (case-insensitive, handle bodyweight)
     if (filters.equipment.length > 0) {
-      result = result.filter((exercise: StoreExercise) => 
-        exercise.equipment?.some((equip: string) => filters.equipment.includes(equip))
-      )
+      result = result.filter((exercise: StoreExercise) => {
+        // If user selected bodyweight (empty string), match exercises with no equipment
+        if (filters.equipment.includes('')) {
+          if (!exercise.equipment || exercise.equipment.length === 0) {
+            return true;
+          }
+        }
+        
+        // Check if exercise equipment matches any selected filters
+        return exercise.equipment?.some((equip: string) => 
+          filters.equipment.some((filterEquip: string) => 
+            filterEquip !== '' && equip.toLowerCase() === filterEquip.toLowerCase()
+          )
+        )
+      })
     }
 
     return result

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { adminScheduledExerciseService, AdminScheduledExercise } from '@/lib/services/admin-scheduled-exercise-service';
+import { adminScheduledExerciseService, AdminScheduledExercise } from '@/lib/services/clients-service/admin-scheduled-exercise-service';
 import { useToast } from '@/lib/hooks/use-toast';
 
 interface UseAdminScheduledExercisesOptions {

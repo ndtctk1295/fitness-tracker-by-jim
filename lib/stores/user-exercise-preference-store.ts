@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { userExercisePreferenceService } from '@/lib/services/user-exercise-preference-service';
+import { userExercisePreferenceService } from '@/lib/services/clients-service/user-exercise-preference-service';
 
 // Store-specific types for frontend compatibility
 interface StoreUserExercisePreference {
