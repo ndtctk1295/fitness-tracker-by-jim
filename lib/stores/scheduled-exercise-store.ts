@@ -746,19 +746,6 @@ export const useScheduledExerciseStoreWithGeneration = () => {
     ensureExercisesGeneratedIfNeeded,
   };
 };
-
-// Hook for initializing the scheduled exercise store
-export const useScheduledExerciseStoreInit = () => {
-  const { initializeStore, isLoading, error } = useScheduledExerciseStore();
-  
-  // Run once when the hook is called
-  React.useEffect(() => {
-    initializeStore();
-  }, []); // Empty dependency array - only run once on mount
-  
-  return { isLoading, error };
-};
-
 // Utility functions 
 export const kgToLbs = (kg: number): number => {
   return kg * 2.20462;

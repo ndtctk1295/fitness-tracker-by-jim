@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { FaGithub, FaGoogle } from 'react-icons/fa';
 // import { toast } from 'sonner';
 import { useToast } from '@/lib/hooks/use-toast';
+import { set } from 'mongoose';
 // import { useToast } from '@/components/ui/use-toast';
 
 export default function SignIn() {
@@ -23,13 +24,6 @@ export default function SignIn() {
     email: '',
     password: '',
   });
-
-  // Add debugging to understand what's happening
-  // console.log('[SignIn] Component rendering - Status:', status, 'Session:', !!session);
-
-  // Don't render anything if middleware is redirecting authenticated users
-  // The middleware should handle the redirect, so we just render the form
-  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -37,49 +31,34 @@ export default function SignIn() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      // Use redirect: true to let NextAuth handle the redirect to dashboard
       const result = await signIn('credentials', {
-        redirect: false,
-        // callbackUrl: '/dashboard',
         email: formData.email,
         password: formData.password,
+        redirect: false, // Handle redirect manually after success
+        callbackUrl: '/dashboard',
       });
 
-      console.log('[SignIn] Sign in result:', result);
+      console.log('[SignIn] Result:', result);
 
-      // This code won't execute if redirect: true is successful
       if (result?.error) {
-        if( result.error === 'CredentialsSignin') {
-          toast({
-            title: 'Sign in failed',
-            description: 'Invalid email or password',
-            variant: 'destructive',
-          });
-        } else {
-          toast({
-            title: 'Sign in failed',
-            description: result.error,
-            variant: 'destructive',
-          });
-        }
+        console.error('Sign-in error:', result.error);
+        toast({
+          title: 'Sign-in failed',
+          description: result.error,
+          variant: 'destructive',
+        });
         setIsLoading(false);
-        return;
+      } else if (result?.ok) {
+        // Wait briefly to ensure cookie is set, then redirect
+        router.push(result?.url || '/dashboard'); // Use result.url if available
       }
-
+    } catch (error) {
+      console.error('Unexpected error during sign-in:', error);
       toast({
-        title: 'Signed in successfully',
-        description: 'Welcome back!',
-        variant: 'default',
-      });
-      router.push('/dashboard');
-    } 
-    catch (error) {
-      console.error('Sign in error:', error);
-      toast({
-        title: 'Sign in error',
-        description: 'Something went wrong',
+        title: 'Sign-in error',
+        description: 'Something went wrong. Please try again.',
         variant: 'destructive',
       });
       setIsLoading(false);

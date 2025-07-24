@@ -169,7 +169,6 @@ class UsersRepository {
   async validateCredentials(email: string, password: string): Promise<UserDocument | null> {
     try {
       await connectToMongoDB();
-      
       const user = await User
         .findOne({ email })
         .select('_id name email role image password createdAt updatedAt')

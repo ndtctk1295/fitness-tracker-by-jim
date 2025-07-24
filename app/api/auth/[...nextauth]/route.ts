@@ -3,38 +3,13 @@ import { MongoDBAdapter } from '@auth/mongodb-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GithubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
-import { MongoClient } from 'mongodb';
+import { MongoClient, MongoClientOptions } from 'mongodb';
 import { usersRepo } from '@/lib/repositories';
 import { validateCredentials } from '@/lib/services/server-service/user-service';
 import { NextAuthOptions } from 'next-auth';
 import NextAuth from 'next-auth/next';
-
-// Add global type declaration for MongoDB client promise in development
-declare global {
-  var _mongoClientPromise: Promise<MongoClient> | undefined;
-}
-
-// MongoDB connection for NextAuth adapter
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-if (!process.env.MONGODB_URI) {
-  throw new Error('Please add your MongoDB URI to .env.local');
-}
-
-if (process.env.NODE_ENV === 'development') {
-  // In development mode, use a global variable to preserve the value
-  // across module reloads caused by HMR (Hot Module Replacement)
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(process.env.MONGODB_URI);
-    global._mongoClientPromise = client.connect();
-  }
-  clientPromise = global._mongoClientPromise!;
-} else {
-  // In production mode, it's best to not use a global variable
-  client = new MongoClient(process.env.MONGODB_URI);
-  clientPromise = client.connect();
-}
+import connectToMongoDB from '@/lib/mongodb';
+import { mongoClientPromise } from '@/lib/mongodb';
 
 // Extend session types to include custom fields
 declare module "next-auth" {
@@ -91,7 +66,7 @@ export const authOptions: NextAuthOptions = {
         
         try {
           // Use the user repository for credential validation
-          const user = await validateCredentials(credentials.email, credentials.password);
+          const user = await usersRepo.validateCredentials(credentials.email, credentials.password);
           
           if (!user) {
             console.log('[NextAuth] Invalid credentials for:', credentials.email);
@@ -123,7 +98,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   
-  adapter: MongoDBAdapter(clientPromise),
+  adapter: MongoDBAdapter(mongoClientPromise),
   
   session: {
     strategy: 'jwt',
@@ -135,11 +110,22 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error',
     signOut: '/auth/signin', // Redirect to signin page after logout
   },
+  cookies: {
+    sessionToken: {
+      name: `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.session-token`,
+      options: {
+        httpOnly: true, // Prevents JavaScript access
+        sameSite: 'lax', // Allows cookie to be sent on redirects
+        path: '/', // Ensures cookie is available site-wide
+        secure: process.env.NODE_ENV === 'production', // Secure in production
+      },
+    },
+  },
   
   callbacks: {
     // Handle redirects after authentication events
     async redirect({ url, baseUrl }) {
-      console.log('[NextAuth] Redirect callback - URL:', url, 'BaseURL:', baseUrl);
+      // console.log('[NextAuth] Redirect callback - URL:', url, 'BaseURL:', baseUrl);
       
       // // If already authenticated and going to signin, go to dashboard instead
       // if (url.includes('/auth/signin')) {
@@ -150,18 +136,18 @@ export const authOptions: NextAuthOptions = {
       // Starts with slash = relative URL from our site
       if (url.startsWith('/')) {
         const fullUrl = `${baseUrl}${url}`;
-        console.log('[NextAuth] Relative URL redirect:', fullUrl);
+        // console.log('[NextAuth] Relative URL redirect:', fullUrl);
         return fullUrl;
       }
       
       // Same origin = allowed
       if (new URL(url).origin === baseUrl) {
-        console.log('[NextAuth] Same origin redirect:', url);
+        // console.log('[NextAuth] Same origin redirect:', url);
         return url;
       }
       
       // Different origin = redirect to dashboard for security
-      console.log('[NextAuth] External origin, redirecting to dashboard');
+      // console.log('[NextAuth] External origin, redirecting to dashboard');
       return `${baseUrl}/dashboard`;
     },
     
@@ -173,13 +159,13 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role;
         token.id = user.id;
-        console.log('[NextAuth] Updated token with user data:', { id: token.id, role: token.role });
+        // console.log('[NextAuth] Updated token with user data:', { id: token.id, role: token.role });
       }
 
       // Handle role updates if using session update
       if (trigger === 'update' && session?.user?.role) {
         token.role = session.user.role;
-        console.log('[NextAuth] Updated token role from session update:', token.role);
+        // console.log('[NextAuth] Updated token role from session update:', token.role);
       }
 
       return token;
@@ -192,11 +178,11 @@ export const authOptions: NextAuthOptions = {
       if (token && session.user) {
         session.user.role = token.role;
         session.user.id = token.id;
-        console.log('[NextAuth] Enhanced session with:', {
-          id: session.user.id,
-          email: session.user.email,
-          role: session.user.role
-        });
+        // console.log('[NextAuth] Enhanced session with:', {
+        //   id: session.user.id,
+        //   email: session.user.email,
+        //   role: session.user.role
+        // });
       }
       
       return session;

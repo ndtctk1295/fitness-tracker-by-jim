@@ -788,14 +788,3 @@ export const useWorkoutPlanStore = create<WorkoutPlanStoreState>()(
   )
 );
 
-// Hook for initializing the workout plan store
-export const useWorkoutPlanStoreInit = () => {
-  const { initializeStore, isLoading, error } = useWorkoutPlanStore();
-  
-  // Run once when the hook is called
-  useEffect(() => {
-    initializeStore();
-  }, []); // Empty dependency array - only run once on mount
-  
-  return { isLoading, error };
-};

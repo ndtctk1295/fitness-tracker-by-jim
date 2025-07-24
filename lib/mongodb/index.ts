@@ -1,3 +1,4 @@
+import { MongoClient } from 'mongodb';
 import mongoose, { Mongoose } from 'mongoose';
 
 declare global {
@@ -126,3 +127,20 @@ export async function checkDatabaseHealth(): Promise<{
 }
 
 export default connectToMongoDB;
+
+
+export async function getMongoClient(): Promise<MongoClient> {
+  const mongooseConnection = await connectToMongoDB();
+  
+  // Extract the underlying MongoDB client from Mongoose
+  const client = mongooseConnection.connection.getClient();
+  
+  if (!client) {
+    throw new Error('Failed to get MongoDB client from Mongoose connection');
+  }
+  
+  return client;
+}
+
+// Create a promise that NextAuth can use
+export const mongoClientPromise: Promise<MongoClient> = getMongoClient();

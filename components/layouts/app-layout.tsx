@@ -96,30 +96,3 @@ export default function AppLayout({ children }: AppLayoutProps) {
     </SidebarProvider>
   );
 }
-
-{/* <SidebarProvider>
-      <MainNav />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                    <BreadcrumbItem className={index === 0 ? "hidden md:block" : ""}>
-                      {crumb.href ? (
-                        <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
-                      ) : (
-                        <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                      )}
-                    </BreadcrumbItem>
-                    {index < breadcrumbs.length - 1 && <BreadcrumbSeparator className="hidden md:block" />}
-                  </React.Fragment>
-                ))}
-              </BreadcrumbList>
-            </Breadcrumb>
-          )}
-        </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
-        <footer className="border-t py-4 px-6 mt-auto">
-            <div className="flex flex-col gap-2 text-center text-xs text-muted-foreground md:flex-row md:gap-4">
-              <p>© {new Date().getFullYear()} Fitness Tracker. All rights reserved.</p>
-            </div>
-          </footer>
-      </SidebarInset>
-    </SidebarProvider> */}

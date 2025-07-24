@@ -3,10 +3,10 @@ import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  console.log(`[MIDDLEWARE ENV:] NODE_ENV: ${process.env.NODE_ENV}, NEXTAUTH_SECRET: ${process.env.NEXTAUTH_SECRET}`);
+  // console.log(`[MIDDLEWARE ENV:] NODE_ENV: ${process.env.NODE_ENV}, NEXTAUTH_SECRET: ${process.env.NEXTAUTH_SECRET}`);
   // Check if this is a NextAuth API route (we want to skip middleware for these routes)
   if (path.startsWith('/api/auth')) {
-    console.log('[Middleware] Skipping NextAuth route:', path);
+    // console.log('[Middleware] Skipping NextAuth route:', path);
     return NextResponse.next();
   }
   
@@ -19,7 +19,7 @@ export async function middleware(req: NextRequest) {
     });
     
     // Enhanced debugging
-    console.log(`[Middleware] Path: ${path}, Has Token: ${!!token}, User ID: ${token?.id || 'None'}`);    // Define public paths that don't require authentication
+    // console.log(`[Middleware] Path: ${path}, Has Token: ${!!token}, User ID: ${token?.id || 'None'}`);    // Define public paths that don't require authentication
     const publicPaths = [
       '/',
       '/auth/signin',
@@ -58,7 +58,7 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL('/dashboard', req.nextUrl));
       }
       
-      console.log(`[Middleware] Allowing access to public path: ${path}`);
+      // console.log(`[Middleware] Allowing access to public path: ${path}`);
       return NextResponse.next();
     }
     

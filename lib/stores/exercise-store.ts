@@ -327,16 +327,5 @@ export const useExerciseStore = create<ExerciseStoreState>()(
   )
 );
 
-// Hook for initializing the exercise store
-export const useExerciseStoreInit = () => {
-  const { initializeStore, isLoading, error } = useExerciseStore();
-  
-  // Run once when the hook is called
-  React.useEffect(() => {
-    initializeStore();
-  }, []); // Empty dependency array - only run once on mount
-  
-  return { isLoading, error };
-};
 
 export default useExerciseStore;
