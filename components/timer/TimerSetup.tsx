@@ -98,7 +98,7 @@ export function TimerSetup({
   }, [todaysExercisesCount, todaysCompletedExercisesCount]);
   
   return (
-    <Card className="mb-6">
+    <Card className="mb-6" data-testid="timer-setup">
       <CardHeader>
         <CardTitle>Start New Timer</CardTitle>
         <CardDescription>Set up your workout timer</CardDescription>
@@ -117,7 +117,7 @@ export function TimerSetup({
                   You need to create a timer strategy before you can start a workout timer.
                 </p>
                 <Link href="/timer-strategies">
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button variant="outline" size="sm" className="gap-2" data-testid="create-strategy-button">
                     <Plus className="h-4 w-4" />
                     Create Timer Strategy
                   </Button>
@@ -129,12 +129,12 @@ export function TimerSetup({
               value={effectiveStrategyId}
               onValueChange={setSelectedStrategyId}
             >
-              <SelectTrigger>
+              <SelectTrigger data-testid="timer-strategy-selector">
                 <SelectValue placeholder="Select a timer strategy" />
               </SelectTrigger>
               <SelectContent>
                 {memoizedStrategies.map((strategy) => (
-                  <SelectItem key={strategy.id} value={strategy.id}>
+                  <SelectItem key={strategy.id} value={strategy.id} data-testid="strategy-option">
                     {strategy.name}
                   </SelectItem>
                 ))}
@@ -161,6 +161,7 @@ export function TimerSetup({
                 id="setup-auto-switch"
                 checked={isAutoSwitchEnabled}
                 onCheckedChange={setIsAutoSwitchEnabled}
+                data-testid="auto-switch-toggle"
               />
               <Label htmlFor="setup-auto-switch" className="text-xs">
                 {isAutoSwitchEnabled ? "Auto" : "Manual"}
@@ -200,6 +201,7 @@ export function TimerSetup({
           onClick={handleStartTimer} 
           className="w-full" 
           disabled={!effectiveStrategyId || todaysExercisesCount === 0 || timerStrategies.length === 0}
+          data-testid="start-timer-button"
         >
           <Play className="mr-2 h-4 w-4" />
           {timerStrategies.length === 0 

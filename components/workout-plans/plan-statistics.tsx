@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { TrendingUp, Calendar, Target, Clock, Award, Activity } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns";
 import { WorkoutPlan } from "@/lib/services/clients-service/workout-plan-service";
-import { useScheduledExerciseStore } from "@/lib/stores/scheduled-exercise-store";
+import { useScheduledExercises } from "@/lib/queries";
 
 interface PlanStatisticsProps {
   workoutPlan: WorkoutPlan;
@@ -25,7 +25,8 @@ interface WorkoutStats {
 }
 
 export function PlanStatistics({ workoutPlan }: PlanStatisticsProps) {
-  const { scheduledExercises } = useScheduledExerciseStore();
+  const { data: scheduledExercisesData } = useScheduledExercises();
+  const scheduledExercises = scheduledExercisesData || [];
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'all'>('week');
   const [stats, setStats] = useState<WorkoutStats>({
     totalWorkouts: 0,
@@ -37,11 +38,7 @@ export function PlanStatistics({ workoutPlan }: PlanStatisticsProps) {
     totalTimeSpent: 0
   });
 
-  useEffect(() => {
-    calculateStats();
-  }, [workoutPlan, scheduledExercises, timeframe]);
-
-  const calculateStats = () => {
+  const calculateStats = useCallback(() => {
     const now = new Date();
     let startDate: Date;
     
@@ -110,7 +107,11 @@ export function PlanStatistics({ workoutPlan }: PlanStatisticsProps) {
       streakDays,
       totalTimeSpent
     });
-  };
+  }, [workoutPlan, scheduledExercisesData, timeframe]);
+
+  useEffect(() => {
+    calculateStats();
+  }, [calculateStats]);
 
   const getCompletionColor = (rate: number) => {
     if (rate >= 80) return "text-green-600";

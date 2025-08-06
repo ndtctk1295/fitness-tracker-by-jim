@@ -15,13 +15,16 @@ import {
 
 /**
  * Calculate date range for month or week view
+ * This should match the visible date range that getCalendarDays returns
  */
 export function getCalendarDateRange(currentDate: Date, view: 'month' | 'week') {
   if (view === 'month') {
-    const monthStart = startOfMonth(currentDate);
-    const monthEnd = endOfMonth(currentDate);
-    return { start: monthStart, end: monthEnd };
+    // For month view, include all visible dates (including previous/next month dates)
+    const start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 0 });
+    const end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 0 });
+    return { start, end };
   } else {
+    // For week view, get the full week
     const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
     const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
     return { start: weekStart, end: weekEnd };

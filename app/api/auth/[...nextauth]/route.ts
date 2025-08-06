@@ -10,7 +10,9 @@ import { NextAuthOptions } from 'next-auth';
 import NextAuth from 'next-auth/next';
 import connectToMongoDB from '@/lib/mongodb';
 import { mongoClientPromise } from '@/lib/mongodb';
-
+import { rateLimitService } from '@/lib/services/rate-limit-service';
+import AuthError from "next-auth"
+// import AuthError from '@/app/auth/error/page';
 // Extend session types to include custom fields
 declare module "next-auth" {
   interface User {
@@ -51,48 +53,93 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     }),
     CredentialsProvider({
+      // type: 'credentials',
       name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' }
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         console.log('[NextAuth] Authorizing credentials for:', credentials?.email);
+        console.log('[NextAuth] Using MongoDB URI:', process.env.MONGODB_URI);
         
         if (!credentials?.email || !credentials?.password) {
           console.log('[NextAuth] Missing credentials');
           return null;
         }
-        
+
         try {
+          // Get client IP for additional rate limiting
+          const clientIP = req?.headers?.['x-forwarded-for'] || 
+                           req?.headers?.['x-real-ip'] || 
+                           req?.connection?.remoteAddress || 
+                           'unknown';
+
+          // Check rate limits for both email and IP
+          const emailRateLimit = await rateLimitService.checkRateLimit(credentials.email, 'email');
+          const ipRateLimit = await rateLimitService.checkRateLimit(clientIP as string, 'ip');
+
+          console.log('[NextAuth] Rate limit check - Email:', emailRateLimit, 'IP:', ipRateLimit);
+
+          // If either email or IP is locked/delayed, reject
+          if (emailRateLimit.isLocked) {
+            console.log('[NextAuth] Account locked:', emailRateLimit.message);
+            throw new Error('AccountLocked');
+          }
+
+          if (emailRateLimit.nextAllowedAttempt && emailRateLimit.nextAllowedAttempt > new Date()) {
+            console.log('[NextAuth] Rate limited:', emailRateLimit.message);
+            throw new Error('RateLimited');
+          }
+
+          if (ipRateLimit.isLocked || (ipRateLimit.nextAllowedAttempt && ipRateLimit.nextAllowedAttempt > new Date())) {
+            console.log('[NextAuth] IP rate limited');
+            throw new Error('RateLimited');
+          }
+
           // Use the user repository for credential validation
           const user = await usersRepo.validateCredentials(credentials.email, credentials.password);
           
           if (!user) {
-            console.log('[NextAuth] Invalid credentials for:', credentials.email);
-            return null;
+            console.log('[NextAuth] User not found or invalid password for:', credentials.email);
+            
+            // Record failed attempt for both email and IP
+            await rateLimitService.recordFailedAttempt(credentials.email, 'email');
+            await rateLimitService.recordFailedAttempt(clientIP as string, 'ip');
+            
+            throw new Error('Invalid Credentials');
           }
 
-          // const formattedUser = usersRepo.formatUserResponse(user);
-          console.log('[NextAuth] User authenticated successfully:', {
-            id: user.id,
-            email: user.email,
-            role: user.role
-          });
+          // Success - clear any rate limiting records
+          await rateLimitService.recordSuccessfulAttempt(credentials.email, 'email');
+          await rateLimitService.recordSuccessfulAttempt(clientIP as string, 'ip');
           
-          return {
-            id: user.id,
-            name: user.name,
+          console.log('[NextAuth] User authenticated successfully:', {
+            id: user._id.toString(),
             email: user.email,
-            role: user.role,
-            image: user.image,
+            role: user.role || 'user'
+          });
+
+          return {
+            id: user._id.toString(),
+            email: user.email,
+            name: user.name,
+            role: user.role || 'user',
           };
         } catch (error) {
-          console.error('[NextAuth] Error during authorization:', error);
-          return null;
-          // return new Response('Invalid credentials', {
-          //   status: 401,
-          // });
+          console.error('[NextAuth] Authorization error:', error);
+          
+          // Handle specific rate limiting errors
+          if (error instanceof Error) {
+            if (error.message === 'AccountLocked') {
+              throw new Error('TooManyAttempts');
+            }
+            if (error.message === 'RateLimited') {
+              throw new Error('TooManyAttempts');
+            }
+          }
+          
+          throw error;
         }
       }
     }),
@@ -107,7 +154,7 @@ export const authOptions: NextAuthOptions = {
   },
     pages: {
     signIn: '/auth/signin',
-    error: '/auth/error',
+    error: '/auth/signin',
     signOut: '/auth/signin', // Redirect to signin page after logout
   },
   cookies: {
@@ -187,6 +234,13 @@ export const authOptions: NextAuthOptions = {
       
       return session;
     },
+  //   async signIn({ user, account, profile, email, credentials }) 
+  //     {
+  //     if(user?.error === 'my custom error') {
+  //        throw new Error('custom error to the client')
+  //     }
+  //     return true
+  //  }
   },
   
   // Enhanced debugging

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useWorkoutPlanStore } from '@/lib/stores/workout-plan-store';
+import { useWorkoutPlanById } from '@/lib/queries';
 import { useApiToast } from '@/lib/hooks/use-api-toast';
 import { WorkoutPlan } from '@/lib/services/clients-service/workout-plan-service';
 import { BasicInfoStep } from '@/components/workout-plans/wizard/basic-info-step';
@@ -16,7 +17,14 @@ export default function EditWorkoutPlanPage() {
   const params = useParams();
   const router = useRouter();
   const planId = params.id as string;
-  const [isLoading, setIsLoading] = useState(true);
+  
+  // Use React Query hook directly for loading the plan
+  const {
+    data: plan,
+    isLoading,
+    error: queryError
+  } = useWorkoutPlanById(planId);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);  const [editData, setEditData] = useState<{
     name: string;
     description: string;
@@ -35,57 +43,40 @@ export default function EditWorkoutPlanPage() {
     weeklySchedule: {}
   });
   
-  const { loadPlanById, updatePlan } = useWorkoutPlanStore();
+  const { updatePlan } = useWorkoutPlanStore();
   const { showSuccessToast, showErrorToast } = useApiToast();
-  // Load plan data once - this prevents infinite loops
+
+  // Transform plan data to edit format when plan is loaded
   useEffect(() => {
-    const fetchPlan = async () => {
-      if (!planId) return;
+    if (plan) {
+      // Transform weeklyTemplate to weeklySchedule format for wizard components
+      const weeklySchedule: Record<string, any[]> = {};
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
       
-      try {
-        setIsLoading(true);
-        const plan = await loadPlanById(planId);
-        
-        if (plan) {
-          // Transform weeklyTemplate to weeklySchedule format for wizard components
-          const weeklySchedule: Record<string, any[]> = {};
-          const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-          
-          plan.weeklyTemplate.forEach(dayTemplate => {
-            const dayName = dayNames[dayTemplate.dayOfWeek];
-            weeklySchedule[dayName] = dayTemplate.exerciseTemplates.map(et => ({
-              id: `${et.exerciseId}_${Math.random().toString(36).substring(2, 9)}`, // Generate temp ID
-              exerciseId: et.exerciseId,
-              sets: et.sets,
-              reps: et.reps,
-              weight: et.weight,
-              duration: et.duration,
-              notes: et.notes
-            }));
-          });
-          
-          setEditData({
-            name: plan.name,
-            description: plan.description || '',
-            level: plan.level,
-            mode: plan.mode,
-            startDate: plan.startDate ? new Date(plan.startDate) : undefined,
-            endDate: plan.endDate ? new Date(plan.endDate) : undefined,
-            weeklySchedule
-          });
-        }
-      } catch (error) {
-        showErrorToast('Failed to load workout plan', 'Plan may not exist or you may not have access');
-        router.push('/workout-plans');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPlan();
-  }, [planId, loadPlanById]); // Only include planId and stable store function
-
-  const handleCancel = () => {
+      plan.weeklyTemplate?.forEach((dayTemplate: any) => {
+        const dayName = dayNames[dayTemplate.dayOfWeek];
+        weeklySchedule[dayName] = dayTemplate.exerciseTemplates?.map((et: any) => ({
+          id: `${et.exerciseId}_${Math.random().toString(36).substring(2, 9)}`, // Generate temp ID
+          exerciseId: et.exerciseId,
+          sets: et.sets,
+          reps: et.reps,
+          weight: et.weight,
+          duration: et.duration,
+          notes: et.notes
+        })) || [];
+      });
+      
+      setEditData({
+        name: plan.name,
+        description: plan.description || '',
+        level: plan.level,
+        mode: plan.mode,
+        startDate: plan.startDate ? new Date(plan.startDate) : undefined,
+        endDate: plan.endDate ? new Date(plan.endDate) : undefined,
+        weeklySchedule
+      });
+    }
+  }, [plan]);  const handleCancel = () => {
     router.push(`/workout-plans/${planId}`);
   };
 
@@ -154,6 +145,34 @@ export default function EditWorkoutPlanPage() {
           <div className="h-48 bg-muted rounded"></div>
           <div className="h-96 bg-muted rounded"></div>
         </div>
+      </div>
+    );
+  }
+
+  if (queryError || !plan) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" onClick={handleCancel}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h1 className="text-3xl font-bold">Edit Workout Plan</h1>
+          </div>
+        </div>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center space-y-4">
+              <div className="text-muted-foreground">
+                {queryError ? 'Error loading workout plan' : 'Workout plan not found'}
+              </div>
+              <Button onClick={handleCancel}>
+                Go Back
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

@@ -114,12 +114,10 @@ export function WorkoutPlanCard({
   const handleDuplicate = async (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsLoading(true);
-    try {      const newPlan = await duplicatePlan(plan.id);
-      if (newPlan) {
-        showSuccessToast('Workout plan duplicated successfully!');
-        await loadAllPlans();
-        router.push(`/workout-plans/${newPlan.id}`);
-      }
+    try {      
+      await duplicatePlan(plan.id);
+      showSuccessToast('Workout plan duplicated successfully!');
+      await loadAllPlans();
     } catch (error) {
       showErrorToast('Failed to duplicate workout plan', 'Please try again');
     } finally {
@@ -156,7 +154,8 @@ export function WorkoutPlanCard({
 
   return (
     <Card 
-      className={`cursor-pointer transition-all hover:shadow-md ${
+      data-testid="workout-plan-card"
+      className={`workout-plan-card cursor-pointer transition-all hover:shadow-md ${
         isActive ? 'border-primary/50 bg-primary/5' : ''
       } ${isLoading ? 'opacity-50' : ''}`}
       onClick={(e) => {

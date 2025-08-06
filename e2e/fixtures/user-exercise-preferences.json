@@ -1,0 +1,32 @@
+[
+  {
+    "exerciseName": "Push-ups",
+    "status": "favorite",
+    "notes": "Great for chest development",
+    "customSettings": {
+      "sets": 4,
+      "reps": 15,
+      "restTime": 60
+    }
+  },
+  {
+    "exerciseName": "Squats",
+    "status": "favorite", 
+    "notes": "Best leg exercise",
+    "customSettings": {
+      "sets": 4,
+      "reps": 20,
+      "restTime": 90
+    }
+  },
+  {
+    "exerciseName": "Plank",
+    "status": "favorite",
+    "notes": "Core stability",
+    "customSettings": {
+      "sets": 3,
+      "duration": 45,
+      "restTime": 30
+    }
+  }
+]

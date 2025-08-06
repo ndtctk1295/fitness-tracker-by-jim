@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Default Workout",
+    "color": "#3b82f6",
+    "restDuration": 60,
+    "activeDuration": 45
+  },
+  {
+    "name": "High Intensity",
+    "color": "#ef4444",
+    "restDuration": 30,
+    "activeDuration": 60
+  },
+  {
+    "name": "Strength Training",
+    "color": "#10b981",
+    "restDuration": 120,
+    "activeDuration": 90
+  }
+]

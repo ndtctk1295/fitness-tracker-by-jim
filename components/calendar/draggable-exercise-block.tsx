@@ -10,6 +10,7 @@ interface DraggableExerciseBlockProps {
     categoryId: string;
     workoutPlanId?: string;
     date: string;
+    isTemplate?: boolean;
   };
   exerciseDetails: {
     id: string;
@@ -63,6 +64,9 @@ export function DraggableExerciseBlock({
         transition-all duration-200 ease-in-out
         ${isDragging ? 'z-50 shadow-lg ring-2 ring-primary/50 scale-105' : 'hover:shadow-sm'}
       `}
+      data-testid="calendar-exercise"
+      data-date={exercise.date}
+      data-type={exercise.workoutPlanId ? (exercise.isTemplate ? 'template' : 'scheduled') : 'manual'}
     >
       {children}
     </div>

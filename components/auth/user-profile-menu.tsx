@@ -104,7 +104,8 @@ export function UserProfileMenu() {
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem 
+        <DropdownMenuItem
+          data-testid="logout-button" 
           onClick={handleSignOut} 
           disabled={isLoading}
           className="text-red-500 focus:text-red-500"

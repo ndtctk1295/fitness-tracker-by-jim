@@ -26,7 +26,6 @@ import { useScheduledExerciseStoreWithGeneration } from "@/lib/stores/scheduled-
 import { scheduledExerciseService } from "@/lib/services/clients-service/scheduled-exercise-service";
 import { useWorkoutPlanStore } from "@/lib/stores/workout-plan-store";
 import { useCalendarStore, useCalendarData } from "@/lib/stores/calendar-store";
-import { useUserExercisePreferenceStore } from "@/lib/stores/user-exercise-preference-store";
 import { useApiToast } from "@/lib/hooks/use-api-toast";
 import { isDateInSameWeek } from "@/lib/utils/calendar/date-utils";
 import { categorizeExercises } from "@/lib/utils/calendar/exercise-utils";
@@ -91,10 +90,6 @@ export default function CalendarPage() {
     updatePlan,
   } = useWorkoutPlanStore();
 
-  // Initialize user exercise preferences (favorites)
-  const { initializeStore: initializeFavorites } =
-    useUserExercisePreferenceStore();
-
   // Combined loading and error states
   const isLoading =
     exerciseLoading || scheduledLoading || workoutPlanLoading || isRescheduling;
@@ -111,9 +106,6 @@ export default function CalendarPage() {
     if (initialized) {
       ensureExercisesGeneratedIfNeeded();
     }
-
-    // Initialize favorites when the page loads
-    initializeFavorites();
   }, [initialized, activePlan]);
 
   // Load exercises for current date range
@@ -148,16 +140,20 @@ export default function CalendarPage() {
   };
 
   // Navigation handlers
+
+  // Destructure actions from the hook
+  const { goToPreviousDate, goToNextDate, goToToday } = useCalendarStore();
+
   const handlePrevious = () => {
-    useCalendarStore.getState().goToPreviousDate();
+    goToPreviousDate();
   };
 
   const handleNext = () => {
-    useCalendarStore.getState().goToNextDate();
+    goToNextDate();
   };
 
   const handleToday = () => {
-    useCalendarStore.getState().goToToday();
+    goToToday();
   };
 
   const toggleView = () => {
@@ -272,7 +268,7 @@ export default function CalendarPage() {
           });
 
           // Now reschedule this temporary exercise with whole-plan scope
-          await rescheduleExercise(tempExercise.id, newDate, "whole-plan");
+          await rescheduleExercise(tempExercise._id, newDate, "whole-plan");
           showSuccessToast(
             "Exercise moved permanently in workout plan template and all future weeks updated"
           );
@@ -335,11 +331,11 @@ export default function CalendarPage() {
 
           <CardContent>
             {isLoading && !isRescheduling ? (
-              <div className="flex justify-center items-center h-96">
+              <div className="flex justify-center items-center h-96" data-testid="calendar-loading">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <div className="relative">
+              <div className="relative" data-testid="calendar-container">
                 <LoadingOverlay isVisible={isRescheduling} />
 
                 <ScrollArea className="w-full">

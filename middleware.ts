@@ -46,7 +46,7 @@ export async function middleware(req: NextRequest) {
     
     // Protected paths include (protected) folder and specific protected routes
     const isProtectedPath = path.startsWith('/(protected)') || 
-      ['/dashboard', '/calendar', '/categories', '/exercises', '/history', '/profile', '/settings', '/timer', '/timer-strategies', '/weights'].some(protectedPath => 
+      ['/dashboard', '/calendar', '/categories', '/exercises', '/history', '/profile', '/settings', '/timer', '/timer-strategies', '/weights', '/workout-plans'].some(protectedPath => 
         path === protectedPath || path.startsWith(`${protectedPath}/`)
       );
     

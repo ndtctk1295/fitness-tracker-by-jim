@@ -168,17 +168,31 @@ class UsersRepository {
    */
   async validateCredentials(email: string, password: string): Promise<UserDocument | null> {
     try {
+      console.log('[UsersRepo] Validating credentials for:', email);
       await connectToMongoDB();
+      console.log('[UsersRepo] Connected to database:', process.env.MONGODB_URI);
+      
       const user = await User
         .findOne({ email })
         .select('_id name email role image password createdAt updatedAt')
         .exec(); // Don't use lean() here as we need the full document
       
-      if (!user || !user.password) return null;
+      console.log('[UsersRepo] User found:', user ? {email: user.email, hasPassword: !!user.password} : 'No user found');
+      
+      if (!user || !user.password) {
+        console.log('[UsersRepo] User not found or no password');
+        return null;
+      }
       
       const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) return null;
+      console.log('[UsersRepo] Password valid:', isPasswordValid);
       
+      if (!isPasswordValid) {
+        console.log('[UsersRepo] Invalid password');
+        return null;
+      }
+      
+      console.log('[UsersRepo] User authenticated successfully');
       return user;
     } catch (error) {
       console.error('Error in UsersRepository.validateCredentials:', error);

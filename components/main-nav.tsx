@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Calendar, Clock, Dumbbell, FolderOpen, ListChecks, Settings, Shield, Timer, User, Weight, Home, Bell, Package2, History, CalendarDays } from "lucide-react"
 import { useSession } from 'next-auth/react'
-import { SidebarMenuButton, Sidebar, SidebarContent, SidebarMenu, SidebarHeader } from "./ui/sidebar"
+import { SidebarMenuButton, Sidebar, SidebarContent, SidebarMenu, SidebarHeader, useSidebar } from "./ui/sidebar"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useWeightStore } from "@/lib/stores/weight-store"
@@ -13,6 +13,14 @@ export function MainNav() {
   const pathname = usePathname()
   const { weightUnit } = useWeightStore()
   const { data: session } = useSession()
+  const { setOpenMobile, isMobile } = useSidebar()
+
+  // Function to handle navigation and close sidebar on mobile
+  const handleNavigation = () => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
 
   const routes = [
     {
@@ -96,7 +104,7 @@ export function MainNav() {
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
+          <Link href="/" className="flex items-center gap-2 font-semibold" onClick={handleNavigation}>
             <Package2 className="h-6 w-6" /> {/* ShadCN example icon */}
             <span>Fitness Tracker</span>
           </Link>
@@ -117,7 +125,7 @@ export function MainNav() {
           // className={cn("justify-start", route.active && "bg-primary text-primary-foreground hover:text-primary-foreground hover:bg-primary/80")}
           asChild
         >
-          <Link href={route.href}>
+          <Link href={route.href} onClick={handleNavigation}>
             {route.icon}
             {route.label}
           </Link>

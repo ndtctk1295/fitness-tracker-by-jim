@@ -31,7 +31,7 @@ export default function HomePage() {
         {status === 'unauthenticated' && (
           <div className="space-y-3">
             <Button asChild className="w-full">
-              <Link href="/auth/signin">Sign In</Link>
+              <Link href="/auth/signin" data-testid="login-link">Sign In</Link>
             </Button>
             <Button variant="outline" asChild className="w-full">
               <Link href="/auth/register">Register</Link>

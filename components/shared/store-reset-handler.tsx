@@ -2,19 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useWorkoutPlanStore } from '@/lib/stores/workout-plan-store';
-import { useScheduledExerciseStore } from '@/lib/stores/scheduled-exercise-store';
-import { useExerciseStore } from '@/lib/stores/exercise-store';
 
 /**
  * Component to handle clearing all stores when user authentication state changes.
  * This prevents data from persisting between different user sessions.
  * 
- * Features:
- * - Detects user changes and resets all stores
- * - Adds user ID to store keys to prevent data leakage
- * - Implements version control for storage migrations
- * - Verifies user ID during store initialization
+ * Uses localStorage-based reset to avoid SSR hydration issues.
  */
 export function StoreResetHandler() {
   const { data: session } = useSession();
@@ -73,56 +66,45 @@ export function StoreResetHandler() {
     
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [userId]);
+  }, [userId, isInitialized]);
 
   /**
    * Reset all application stores to their initial state
+   * Uses localStorage clearing instead of direct store access to avoid SSR issues
    */
   const resetAllStores = () => {
-    // Reset each store
-    if (useWorkoutPlanStore.getState().reset) {
-      useWorkoutPlanStore.getState().reset();
-    }
-    
-    if (useScheduledExerciseStore.getState().reset) {
-      useScheduledExerciseStore.getState().reset();
-    }
-    
-    if (useExerciseStore.getState().reset) {
-      useExerciseStore.getState().reset();
-    }
-    
-    // Clear any other relevant state
-    localStorage.removeItem('workout-plan-user-id');
-    
-    // Clear user-specific store keys
+    // Clear user-specific store keys from localStorage
     const userStoreKeys = Object.keys(localStorage).filter(key => 
       key.includes('user-') || 
       key.includes('-store-') || 
       key.includes('workout-plan') ||
       key.includes('exercise') ||
-      key.includes('scheduled')
+      key.includes('scheduled') ||
+      key.includes('timer') ||
+      key.includes('weight') ||
+      key.includes('category')
     );
     
     userStoreKeys.forEach(key => {
       localStorage.removeItem(key);
     });
     
-    console.log('[StoreResetHandler] All stores have been reset');
+    // Clear any other relevant state
+    localStorage.removeItem('workout-plan-user-id');
+    
+    // Trigger a page reload to reinitialize all stores
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('store-reset'));
+    }
+    
+    console.log('[StoreResetHandler] All stores have been reset via localStorage clearing');
   };
 
   /**
    * Handle storage schema version migrations
-   * @param oldVersion Previous storage schema version
-   * @param newVersion New storage schema version
    */
   const handleVersionMigration = (oldVersion: string, newVersion: string) => {
     console.log(`Migrating storage schema from ${oldVersion} to ${newVersion}`);
-    
-    // Here we can implement specific migration logic based on version changes
-    // For now, we'll just reset everything as the safest approach
-    
-    // Example: if (oldVersion === '0.9.0' && newVersion === '1.0.0') { ... }
     
     // Default behavior: reset all stores to avoid compatibility issues
     resetAllStores();

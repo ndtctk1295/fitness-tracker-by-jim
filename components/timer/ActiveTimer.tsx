@@ -78,44 +78,46 @@ export function ActiveTimer({
   toast,
 }: ActiveTimerProps) {
   return (
-    <Card className="mb-6 overflow-hidden">
+    <Card className="mb-6 overflow-hidden" data-testid="active-timer">
       <div
         className="h-2 w-full"
         style={{ backgroundColor: strategy.color }}
+        data-testid="timer-progress"
       >
         <div
           className="h-full bg-primary transition-all"
           style={{ width: `${percentComplete()}%` }}
+          data-testid="progress-bar"
         />
       </div>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>{strategy.name}</CardTitle>
-          <Badge variant={activeTimer.isRest ? "secondary" : "default"}>
+          <Badge variant={activeTimer.isRest ? "secondary" : "default"} data-testid="timer-mode">
             {activeTimer.isRest ? "REST" : "ACTIVE"}
           </Badge>
         </div>
-        <CardDescription>
+        <CardDescription data-testid="timer-status">
           {activeTimer.isRest ? "Rest between sets" : "Active workout period"}
         </CardDescription>
       </CardHeader>
 
       <CardContent>
         {currentExercise && (
-          <div className="mb-6 p-4 bg-muted rounded-lg">
+          <div className="mb-6 p-4 bg-muted rounded-lg" data-testid="current-exercise-details">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center">
                 <Dumbbell className="mr-2 h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">{currentExercise.name}</h3>
+                <h3 className="text-lg font-semibold" data-testid="current-exercise-name">{currentExercise.name}</h3>
               </div>
               <Badge variant={activeTimer.isRest ? "outline" : "default"}>
                 {activeTimer.isRest ? "Coming up" : "Current"}
               </Badge>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-sm mt-2">
+            <div className="grid grid-cols-3 gap-2 text-sm mt-2" data-testid="current-exercise-specs">
               <div className="flex items-center">
                 <span className="text-muted-foreground mr-1">Set:</span>
-                <span className="font-medium">
+                <span className="font-medium" data-testid="current-set">
                   {currentSet}/{getCurrentExerciseDetails().sets}
                 </span>
               </div>
@@ -180,7 +182,7 @@ export function ActiveTimer({
 
         {/* Timer Display */}
         <div className="flex flex-col items-center">
-          <div className="text-6xl font-bold mb-4">{displayTime()}</div>
+          <div className="text-6xl font-bold mb-4" data-testid="timer-display">{displayTime()}</div>
 
           <div className="w-full flex items-center justify-center mb-4 gap-2">
             <Button
@@ -214,6 +216,7 @@ export function ActiveTimer({
                 }
               }}
               title={isSoundEnabled ? "Mute sound" : "Enable sound"}
+              data-testid="sound-toggle"
             >
               {isSoundEnabled ? (
                 <Volume2 className="h-5 w-5" />
@@ -242,6 +245,7 @@ export function ActiveTimer({
                       });
                     }
                   }}
+                  data-testid="test-sound-button"
                 >
                   Test sound
                 </Button>
@@ -273,7 +277,7 @@ export function ActiveTimer({
 
           <div className="grid grid-cols-3 gap-2 w-full">            {/* Primary action buttons */}
             {activeTimer.isActive && !activeTimer.isPaused && isRunning ? (
-              <Button variant="outline" onClick={handlePauseTimer}>
+              <Button variant="outline" onClick={handlePauseTimer} data-testid="pause-timer-button">
                 <Pause className="mr-2 h-4 w-4" />
                 Pause
               </Button>
@@ -282,30 +286,31 @@ export function ActiveTimer({
                 variant={!isAutoSwitchEnabled ? "default" : "outline"}
                 onClick={handleNextSegment}
                 className={!isAutoSwitchEnabled ? "bg-green-600 hover:bg-green-700 animate-pulse" : ""}
+                data-testid="next-phase-button"
               >
                 <RotateCcw className="mr-2 h-4 w-4" />
                 {!isAutoSwitchEnabled ? "Next" : activeTimer.isRest ? "Start Set" : "Start Rest"}
               </Button>
             ) : activeTimer.isActive && activeTimer.isPaused ? (
-              <Button variant="outline" onClick={handleResumeTimer}>
+              <Button variant="outline" onClick={handleResumeTimer} data-testid="resume-timer-button">
                 <Play className="mr-2 h-4 w-4" />
                 Resume
               </Button>
             ) : (
-              <Button variant="outline" onClick={handleResumeTimer}>
+              <Button variant="outline" onClick={handleResumeTimer} data-testid="resume-timer-button">
                 <Play className="mr-2 h-4 w-4" />
                 Resume
               </Button>
             )}
 
             {/* Skip to end button */}
-            <Button variant="secondary" onClick={skipToEnd}>
+            <Button variant="secondary" onClick={skipToEnd} data-testid="skip-timer-button">
               <CheckCircle2 className="mr-2 h-4 w-4" />
               Skip
             </Button>
 
             {/* Stop button */}
-            <Button variant="destructive" onClick={handleStopTimer}>
+            <Button variant="destructive" onClick={handleStopTimer} data-testid="stop-timer-button">
               <StopCircle className="mr-2 h-4 w-4" />
               Stop
             </Button>

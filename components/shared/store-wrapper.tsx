@@ -1,12 +1,13 @@
-'use clients';
-import { StoreInit } from "./store-init";
+'use client';
+import { ClientOnly } from "./client-only";
 import { StoreResetHandler } from "./store-reset-handler";
 
 export function StoreWrapper({children}: {children?: React.ReactNode}) {
     return (
         <>
-        <StoreInit />
-        <StoreResetHandler />
+        <ClientOnly>
+            <StoreResetHandler />
+        </ClientOnly>
         {children}
         </>
     );

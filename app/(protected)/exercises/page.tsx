@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useExerciseStore } from '@/lib/stores/exercise-store'
 import { useUserExercisePreferenceStore } from '@/lib/stores/user-exercise-preference-store'
@@ -12,23 +12,18 @@ export default function ExercisesPage() {
     categories,
     exercises, 
     isLoading: exercisesLoading, 
-    error: exercisesError, 
-    initializeStore
+    error: exercisesError
   } = useExerciseStore()
   
   const { 
     preferences, 
-    isLoading: preferencesLoading,
-    initializeStore: initializePreferences 
+    isLoading: preferencesLoading
   } = useUserExercisePreferenceStore()
 
   const [activeMainTab, setActiveMainTab] = useState('all-exercises')
 
-  // Fetch data on component mount
-  useEffect(() => {
-    initializeStore()
-    initializePreferences()
-  }, [initializeStore, initializePreferences])
+  // Remove the useEffect that was causing the infinite loop
+  // TanStack Query will automatically fetch data when components mount
 
   const isLoading = exercisesLoading || preferencesLoading
 

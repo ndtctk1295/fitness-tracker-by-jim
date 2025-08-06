@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 /**
  * Check if an exercise has a valid workout plan ID
  */
@@ -44,7 +46,7 @@ export function getWorkoutPlanTemplateExercises(
     };
   }
 
-  const dateStr = date.toISOString().split('T')[0];
+  const dateStr = format(date, 'yyyy-MM-dd');
   const scheduledForDate = scheduledExercises.filter((ex: any) => ex.date === dateStr && !ex.isHidden);
   
   // Check if there are ANY scheduled exercises from this specific workout plan for this date

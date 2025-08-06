@@ -19,7 +19,8 @@ export default function WorkoutPlansPage() {
     activePlan,
     isLoading: storeLoading,
     error,
-    initialized
+    initialized,
+    loadAllPlans
   } = useWorkoutPlanStore();
   
   const { showSuccessToast, showErrorToast } = useApiToast();
@@ -32,11 +33,11 @@ export default function WorkoutPlansPage() {
   }, [storeLoading, initialized]);  const handleWizardComplete = async () => {
     setShowWizard(false);
     showSuccessToast('Workout plan created successfully!');
-    
+
     // Refresh the plans list
     try {
-      // Refresh data using the initialize method
-      await useWorkoutPlanStore.getState().initializeStore();
+      // Refresh data using the loadAllPlans method
+      await loadAllPlans();
     } catch (error) {
       showErrorToast('Failed to refresh workout plans', 'Please refresh the page');
     }

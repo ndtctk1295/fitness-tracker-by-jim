@@ -44,7 +44,7 @@ export function ScopeSelectionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" data-testid="scope-selection-dialog">
         <DialogHeader>
           <DialogTitle>Move Exercise</DialogTitle>
           <DialogDescription>
@@ -60,7 +60,7 @@ export function ScopeSelectionDialog({
           className="grid gap-4"
         >
           <div className="flex items-center space-x-2 p-3 border rounded-lg">
-            <RadioGroupItem value="this-week" id="this-week" />
+            <RadioGroupItem value="this-week" id="this-week" data-testid="this-week-option" />
             <Label htmlFor="this-week" className="flex-1 cursor-pointer">
               <div className="flex items-center gap-2 mb-1">
                 <Clock className="h-4 w-4 text-muted-foreground" />
@@ -73,7 +73,7 @@ export function ScopeSelectionDialog({
           </div>
 
           <div className="flex items-center space-x-2 p-3 border rounded-lg">
-            <RadioGroupItem value="whole-plan" id="whole-plan" />
+            <RadioGroupItem value="whole-plan" id="whole-plan" data-testid="whole-plan-option" />
             <Label htmlFor="whole-plan" className="flex-1 cursor-pointer">
               <div className="flex items-center gap-2 mb-1">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -90,7 +90,7 @@ export function ScopeSelectionDialog({
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button onClick={handleConfirm}>
+          <Button onClick={handleConfirm} data-testid="confirm-scope">
             Confirm Move
           </Button>
         </DialogFooter>

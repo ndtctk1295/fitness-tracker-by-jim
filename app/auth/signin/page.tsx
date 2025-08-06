@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,12 +10,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { FaGithub, FaGoogle } from 'react-icons/fa';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 // import { toast } from 'sonner';
 import { useToast } from '@/lib/hooks/use-toast';
-import { set } from 'mongoose';
+import { unknown } from 'zod';
 // import { useToast } from '@/components/ui/use-toast';
 
 export default function SignIn() {
+  const [showPassword, setShowPassword] = useState(false);
   const { data: session, status } = useSession();
   const {toast} = useToast();
   const router = useRouter();
@@ -24,6 +26,14 @@ export default function SignIn() {
     email: '',
     password: '',
   });
+    const errorMessage = {
+    unknown: 'An unknown error occurred. Please try again later.',
+    networkError: 'A network error occurred. Please check your connection and try again.',
+    title: 'Signin failed',
+    CredentialsSignin: "Invalid Email or Password.",
+    TooManyAttempts: "Too many failed attempts. Your account has been temporarily locked for security.",
+    default: "An error occurred. Please try again.",
+  };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -43,22 +53,35 @@ export default function SignIn() {
       console.log('[SignIn] Result:', result);
 
       if (result?.error) {
-        console.error('Sign-in error:', result.error);
-        toast({
-          title: 'Sign-in failed',
-          description: result.error,
-          variant: 'destructive',
-        });
+        // console.error('Sign-in error:', result.error);
+        if( result.error === 'CredentialsSignin') {
+          toast({
+            title: errorMessage.title,
+            description: errorMessage.CredentialsSignin,
+            variant: 'destructive',
+          });
+        } else if (result.error === 'TooManyAttempts') {
+          toast({
+            title: errorMessage.title,
+            description: errorMessage.TooManyAttempts,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: errorMessage.title,
+            description: errorMessage.default,
+            variant: 'destructive',
+          });
+        }
         setIsLoading(false);
       } else if (result?.ok) {
         // Wait briefly to ensure cookie is set, then redirect
         router.push(result?.url || '/dashboard'); // Use result.url if available
       }
     } catch (error) {
-      console.error('Unexpected error during sign-in:', error);
       toast({
-        title: 'Sign-in error',
-        description: 'Something went wrong. Please try again.',
+        title: 'Sign-in failed',
+        description: errorMessage.unknown,
         variant: 'destructive',
       });
       setIsLoading(false);
@@ -95,6 +118,7 @@ export default function SignIn() {
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isLoading}
+                data-testid="email-input"
               />
             </div>
             <div className="space-y-2">
@@ -104,17 +128,35 @@ export default function SignIn() {
                   Forgot password?
                 </a>
               </div>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                disabled={isLoading}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  data-testid="password-input"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-primary hover:text-primary-foreground p-1 rounded focus:outline-none"
+                  data-testid="toggle-password-visibility"
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                </button>
+              </div>
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            { errorMessage.CredentialsSignin && (
+              <p className="text-sm text-destructive" data-testid="Sign-in failed">
+                {errorMessage.CredentialsSignin}
+              </p>
+            )}
+            <Button type="submit" className="w-full" disabled={isLoading} data-testid="login-button">
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>

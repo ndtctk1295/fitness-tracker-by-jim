@@ -33,12 +33,16 @@ export function CalendarHeader({
   const headerText = getCalendarHeaderText(currentDate, calendarView as 'month' | 'week');
 
   return (
-    <CardHeader>
+    <CardHeader data-testid="calendar-header">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
         <div className="space-y-1">
-          <CardTitle>{headerText}</CardTitle>
+          <CardTitle>Calendar</CardTitle>
+          <CardDescription data-testid="calendar-month-year">
+            {headerText}
+          </CardDescription>
           <CardDescription>
             Your scheduled exercises{activePlanName ? ` and ${activePlanName} workout plan` : ''}
+            {activePlanName && <span data-testid="active-plan-name"> - {activePlanName}</span>}
           </CardDescription>
         </div>
 
@@ -50,10 +54,10 @@ export function CalendarHeader({
           />
           
           <div className="flex space-x-2 mb-2 sm:mb-0 mr-2">
-            <Button onClick={onToday} variant="outline" size="sm">
+            <Button onClick={onToday} variant="outline" size="sm" data-testid="calendar-today-btn">
               Today
             </Button>
-            <Button onClick={onToggleView} variant="outline" size="sm">
+            <Button onClick={onToggleView} variant="outline" size="sm" data-testid="calendar-view-toggle">
               {calendarView === 'month'
                 ? <><CalendarDays className="h-4 w-4 mr-2" /> Week View</>
                 : <><CalendarIcon className="h-4 w-4 mr-2" /> Month View</>
@@ -61,10 +65,10 @@ export function CalendarHeader({
             </Button>
           </div>
           <div className="flex items-center mt-auto">
-            <Button onClick={onPrevious} variant="outline" size="icon" className="rounded-r-none">
+            <Button onClick={onPrevious} variant="outline" size="icon" className="rounded-r-none" data-testid="calendar-prev-btn">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button onClick={onNext} variant="outline" size="icon" className="rounded-l-none border-l-0">
+            <Button onClick={onNext} variant="outline" size="icon" className="rounded-l-none border-l-0" data-testid="calendar-next-btn">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

@@ -1,8 +1,9 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import { format, isBefore, startOfDay } from "date-fns"
-import { Plus, Edit, Trash2, X, Save, Loader2 } from "lucide-react"
+import { Plus, Edit, Trash2, X, Save, Loader2, Timer } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -50,7 +51,10 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
   const {
     isLoading: scheduledLoading,
     error: scheduledError,
-    getExercisesForDate
+    getExercisesForDate,
+    addScheduledExercise,
+    updateScheduledExercise,
+    deleteScheduledExercise
   } = useScheduledExerciseStore();
 
   // Filter exercises for the current date
@@ -145,7 +149,17 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
   // Handle add exercise
   const handleAddExercise = async () => {
     if (selectedExerciseId && sets && reps) {
-      await addExercise(date, weightUnit)
+      try {
+        console.log('🏋️ [ExerciseDialog] Adding exercise for date:', date);
+        const exerciseData = await addExercise(date, weightUnit);
+        if (exerciseData) {
+          console.log('🏋️ [ExerciseDialog] Exercise created, calling addScheduledExercise:', exerciseData);
+          await addScheduledExercise(exerciseData);
+          console.log('🏋️ [ExerciseDialog] addScheduledExercise completed');
+        }
+      } catch (error) {
+        console.error('Error adding exercise:', error);
+      }
     }
   }
 
@@ -153,7 +167,10 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
   const handleUpdateExercise = async () => {
     if (editingExerciseId && selectedExerciseId && sets && reps) {
       try {
-        await updateExercise(weightUnit)
+        const updateData = await updateExercise(weightUnit);
+        if (updateData) {
+          await updateScheduledExercise(updateData.id, updateData.updates);
+        }
         toast({
           title: "Success",
           description: "Exercise updated successfully",
@@ -199,9 +216,9 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-7xl max-h-[98vh] flex flex-col">
+      <DialogContent className="max-w-7xl max-h-[98vh] flex flex-col" data-testid="exercise-detail-dialog">
         <DialogHeader>
-          <DialogTitle>Exercises for {format(date, "MMMM d, yyyy")}</DialogTitle>
+          <DialogTitle data-testid="dialog-title">Exercises for {format(date, "MMMM d, yyyy")}</DialogTitle>
         </DialogHeader>
 
         {scheduledError && (
@@ -216,17 +233,17 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
             value={activeTab} 
             onValueChange={(value) => setActiveTab(value as 'list' | 'add' | 'edit')}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" data-testid="mobile-tab-selector">
               <SelectValue>
                 {activeTab === 'list' && 'Scheduled Exercises'}
                 {activeTab === 'add' && 'Add Exercise'}
                 {activeTab === 'edit' && 'Edit Exercise'}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="list">Scheduled Exercises</SelectItem>
-              <SelectItem value="add">Add Exercise</SelectItem>
-              <SelectItem value="edit" disabled={!editingExerciseId}>
+            <SelectContent data-testid="mobile-tab-options">
+              <SelectItem value="list" data-testid="mobile-tab-option-list">Scheduled Exercises</SelectItem>
+              <SelectItem value="add" data-testid="mobile-tab-option-add">Add Exercise</SelectItem>
+              <SelectItem value="edit" disabled={!editingExerciseId} data-testid="mobile-tab-option-edit">
                 Edit Exercise
               </SelectItem>
             </SelectContent>
@@ -238,14 +255,14 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
           onValueChange={(value) => setActiveTab(value as 'list' | 'add' | 'edit')} 
           className="flex-1 flex flex-col min-h-0">
           {/* Desktop: Regular tabs */}
-          <TabsList className="hidden sm:grid sm:grid-cols-3 w-full mb-4">
-            <TabsTrigger value="list">
+          <TabsList className="hidden sm:grid sm:grid-cols-3 w-full mb-4" data-testid="desktop-tabs">
+            <TabsTrigger value="list" data-testid="scheduled-exercises-tab">
               Scheduled Exercises
             </TabsTrigger>
-            <TabsTrigger value="add" disabled={isPastDate}>
+            <TabsTrigger value="add" disabled={isPastDate} data-testid="add-exercise-tab">
               Add Exercise
             </TabsTrigger>
-            <TabsTrigger value="edit" disabled={!editingExerciseId}>
+            <TabsTrigger value="edit" disabled={!editingExerciseId} data-testid="edit-exercise-tab">
               Edit Exercise
             </TabsTrigger>
           </TabsList>
@@ -259,7 +276,18 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
             ) : (
               <>
                 {dayExercises.length > 0 && (
-                  <div className="flex justify-end mb-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <Link href="/timer" onClick={() => onOpenChange(false)}>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="bg-primary text-primary-foreground hover:bg-primary/90"
+                        data-testid="start-timer-link"
+                      >
+                        <Timer className="h-4 w-4 mr-1" />
+                        Start Workout
+                      </Button>
+                    </Link>
                     <Button
                       variant="destructive"
                       size="sm"
@@ -273,7 +301,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                 )}
                 <ScrollArea className="h-[550px] w-full rounded-md border p-4">
                   {dayExercises.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4" data-testid="exercise-list">
                       {dayExercises.map((scheduled: any) => {
                         const exercise = exercises.find((e) => e.id === scheduled.exerciseId)
                         const category = scheduled.categoryId ? categories.find((c) => c.id === scheduled.categoryId) : null
@@ -281,7 +309,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                         if (!exercise) return null
 
                         return (
-                          <div key={scheduled.id} className="border rounded-lg p-4">
+                          <div key={scheduled.id} className="border rounded-lg p-4" data-testid="exercise-item">
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
@@ -347,6 +375,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                                   size="sm" 
                                   onClick={() => handleStartEditing(scheduled.id)}
                                   disabled={localIsLoading}
+                                  data-testid="edit-exercise-btn"
                                 >
                                   <Edit className="h-4 w-4 mr-1" />
                                   Edit
@@ -357,6 +386,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                                   onClick={() => setDeleteDialogState({ isOpen: true, exerciseId: scheduled.id, deleteAll: false })}
                                   className="text-destructive"
                                   disabled={localIsLoading}
+                                  data-testid="delete-exercise-btn"
                                 >
                                   <Trash2 className="h-4 w-4 mr-1" />
                                   Delete
@@ -368,7 +398,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                       })}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-muted-foreground">No exercises scheduled for this day</div>
+                    <div className="text-center py-8 text-muted-foreground" data-testid="no-exercises">No exercises scheduled for this day</div>
                   )}
                   <ScrollBar />
                 </ScrollArea>
@@ -376,14 +406,14 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
             )}
           </TabsContent>
 
-          <TabsContent value="add" className="flex-1 flex flex-col min-h-0">
+          <TabsContent value="add" className="flex-1 flex flex-col min-h-0" data-testid="add-exercise-content">
             {/* Exercise Selection Tabs */}
             <div className="mb-4">
               <Tabs 
                 value={exerciseSelectionTab} 
                 onValueChange={(value) => setExerciseSelectionTab(value as 'favorites' | 'all')}>
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="favorites" className="flex items-center gap-2">
+                  <TabsTrigger value="favorites" className="flex items-center gap-2" data-testid="favorites-tab">
                     ❤️ Favorites
                     {favoriteExercises.length > 0 && (
                       <Badge variant="secondary" className="ml-1 h-5 text-xs">
@@ -391,7 +421,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                       </Badge>
                     )}
                   </TabsTrigger>
-                  <TabsTrigger value="all">
+                  <TabsTrigger value="all" data-testid="all-exercises-tab">
                     📋 All Exercises
                     <Badge variant="secondary" className="ml-1 h-5 text-xs">
                       {exercises.length}
@@ -404,9 +434,11 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
             <ScrollArea className="h-[500px] w-full rounded-md border p-4">
               <div className="grid gap-6">
                 {exerciseSelectionTab === 'favorites' && favoriteExercises.length === 0 && !favoritesLoading && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p className="text-lg mb-2">No favorite exercises yet</p>
-                    <p className="text-sm">Switch to "All Exercises" to browse and mark exercises as favorites</p>
+                  <div className="text-center py-8 text-muted-foreground" data-testid="favorites-content">
+                    <div data-testid="no-favorites-message">
+                      <p className="text-lg mb-2">No favorite exercises yet</p>
+                      <p className="text-sm">Switch to "All Exercises" to browse and mark exercises as favorites</p>
+                    </div>
                   </div>
                 )}
                 
@@ -417,6 +449,12 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                   </div>
                 )}
 
+                {favoriteExercises.length > 0 && exerciseSelectionTab === 'favorites' && (
+                  <div data-testid="favorites-content">
+                    {/* Favorites content will go here */}
+                  </div>
+                )}
+
                 {((exerciseSelectionTab === 'favorites' && favoriteExercises.length > 0) || 
                   (exerciseSelectionTab === 'all')) && (
                   <>
@@ -424,7 +462,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="category">Category</Label>
-                          <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+                          <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId} data-testid="exercise-category">
                             <SelectTrigger id="category">
                               <SelectValue placeholder="Select category" />
                             </SelectTrigger>
@@ -447,6 +485,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                             value={selectedExerciseId}
                             onValueChange={setSelectedExerciseId}
                             disabled={!selectedCategoryId}
+                            data-testid="exercise-option"
                           >
                             <SelectTrigger id="exercise">
                               <SelectValue placeholder="Select exercise" />
@@ -484,6 +523,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                             value={sets}
                             onChange={(e) => setSets(Number(e.target.value))}
                             placeholder="3"
+                            data-testid="sets-input"
                           />
                         </div>
 
@@ -496,6 +536,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                             value={reps}
                             onChange={(e) => setReps(Number(e.target.value))}
                             placeholder="12"
+                            data-testid="reps-input"
                           />
                         </div>
 
@@ -509,6 +550,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                             value={weight}
                             onChange={(e) => setWeight(Number(e.target.value))}
                             placeholder="0"
+                            data-testid="weight-input"
                           />
                         </div>
                       </div>
@@ -520,6 +562,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                           onChange={handleWeightPlateChange}
                           weights={weights}
                           unit={weightUnit}
+                          data-testid="weight-plate-selector"
                         />
                       </div>
                     </div>
@@ -528,6 +571,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                       onClick={handleAddExercise} 
                       disabled={!selectedExerciseId || !sets || !reps || localIsLoading || scheduledLoading} 
                       className="w-full"
+                      data-testid="save-exercise"
                     >
                       {localIsLoading ? (
                         <>
@@ -606,7 +650,7 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
                       <X className="mr-2 h-4 w-4" />
                       Cancel
                     </Button>
-                    <Button onClick={handleUpdateExercise} disabled={localIsLoading} className="flex-1">
+                    <Button onClick={handleUpdateExercise} disabled={localIsLoading} className="flex-1" data-testid="update-exercise">
                       {localIsLoading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -634,9 +678,14 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
         onClose={() => setDeleteDialogState({ isOpen: false, exerciseId: "", deleteAll: false })}
         onConfirm={async () => {
           if (deleteDialogState.deleteAll) {
-            await clearExercises(date);
+            const clearData = await clearExercises(date);
+            // Handle clearing all exercises for the date if needed
+            // This would require implementing a bulk delete API
           } else if (deleteDialogState.exerciseId) {
-            await deleteExercise(deleteDialogState.exerciseId);
+            const deleteData = await deleteExercise(deleteDialogState.exerciseId);
+            if (deleteData) {
+              await deleteScheduledExercise(deleteData.id);
+            }
           }
         }}
         title={deleteDialogState.deleteAll ? "Clear All Exercises" : "Delete Exercise"}

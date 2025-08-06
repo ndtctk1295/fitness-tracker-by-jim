@@ -8,13 +8,18 @@ interface DroppableCalendarDateProps {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;
+  'data-testid'?: string;
+  'data-date'?: string;
 }
 
 export function DroppableCalendarDate({ 
   date, 
   children, 
   className = '',
-  onClick 
+  onClick,
+  'data-testid': testId,
+  'data-date': dataDate,
+  ...props
 }: DroppableCalendarDateProps) {
   const {
     isOver,
@@ -66,6 +71,9 @@ export function DroppableCalendarDate({
         transition-all duration-200 ease-in-out
       `}
       onClick={onClick}
+      data-testid={testId}
+      data-date={dataDate}
+      {...props}
     >
       {children}
       {isOver && (

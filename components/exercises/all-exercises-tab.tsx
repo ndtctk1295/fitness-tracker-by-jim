@@ -47,29 +47,6 @@ export function AllExercisesTab({
     setFilters(prev => ({ ...prev, category: activeTab }))
   }, [activeTab])
 
-  // Display loading state when data is being fetched
-  if (isLoading && exercises.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground">Loading exercises data...</p>
-      </div>
-    )
-  }
-  
-  // Display error state if there's any error with data
-  if (exercisesError) {
-    return (
-      <Alert variant="destructive" className="mb-6">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          There was a problem loading exercise data. Please try refreshing the page.
-        </AlertDescription>
-      </Alert>
-    )
-  }
-
   // Filter exercises based on all criteria
   const filteredExercises = useMemo(() => {
     let result = exercises.filter((exercise: StoreExercise) => exercise.isActive !== false)
@@ -148,6 +125,29 @@ export function AllExercisesTab({
     }
     const category = categories.find((cat: StoreCategory) => cat.id === activeTab)
     return category?.name || 'All Exercises'
+  }
+
+  // Display loading state when data is being fetched
+  if (isLoading && exercises.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">Loading exercises data...</p>
+      </div>
+    )
+  }
+  
+  // Display error state if there's any error with data
+  if (exercisesError) {
+    return (
+      <Alert variant="destructive" className="mb-6">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          There was a problem loading exercise data. Please try refreshing the page.
+        </AlertDescription>
+      </Alert>
+    )
   }
 
   return (

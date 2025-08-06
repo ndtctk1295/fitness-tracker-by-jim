@@ -4,6 +4,7 @@ const headers = [
   "Content-MD5", "Content-Type", "Date", "X-Api-Version",
   "X-CSRF-Token", "X-Requested-With",
 ];
+
 const nextConfig = {
   output: 'standalone',
   eslint: {
@@ -16,12 +17,33 @@ const nextConfig = {
     unoptimized: true,
   },
   
-  // Production optimizations for database operations
+  // Critical: Better handling of external packages in standalone mode
   serverExternalPackages: ['mongoose', 'bcrypt'],
+  
+  // Experimental features for better SSR handling
+  experimental: {
+    // Improve hydration in production
+    optimizePackageImports: ['@tanstack/react-query', 'zustand'],
+  },
   
   // Performance optimizations
   compress: true,
   poweredByHeader: false,
+  
+  // Webpack configuration for better bundle handling
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Ensure proper client-side hydration
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    
+    return config;
+  },
   
   // Headers for better caching and security
   async headers() {

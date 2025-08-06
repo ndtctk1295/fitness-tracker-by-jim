@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect } from 'react'
 import { Heart, Clock, Star, Dumbbell, AlertCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -48,15 +47,13 @@ export function UserExerciseSections({ onExerciseClick }: UserExerciseSectionsPr
     preferences, 
     isLoading: preferencesLoading,
     error: preferencesError,
-    initializeStore: initializePreferences,
     getFavoriteExercises,
     forceRefresh
   } = useUserExercisePreferenceStore()
   
   const { 
     exercises, 
-    isLoading: exercisesLoading,
-    initializeStore: initializeExercises 
+    isLoading: exercisesLoading
   } = useExerciseStore()
 
   // Mock categories for now
@@ -67,11 +64,8 @@ export function UserExerciseSections({ onExerciseClick }: UserExerciseSectionsPr
     { id: 'sports', name: 'Sports', color: '#f59e0b' },
   ]
 
-  // Fetch data on mount
-  useEffect(() => {
-    initializePreferences()
-    initializeExercises()
-  }, [initializePreferences, initializeExercises])
+  // Remove the useEffect that was causing infinite loop
+  // TanStack Query will automatically fetch data when needed
 
   const isLoading = preferencesLoading || exercisesLoading
   // Get exercises by status

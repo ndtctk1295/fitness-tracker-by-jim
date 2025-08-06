@@ -25,6 +25,31 @@ export interface Category {
   createdAt: string;
   updatedAt: string;
 }
+export interface WorkoutPlan {
+  _id?: string;
+  id?: string;
+  userId: string;
+  name: string;
+  description?: string;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  duration?: number;
+  isActive: boolean;
+  mode: 'ongoing' | 'dated';
+  startDate?: Date;
+  endDate?: Date;
+  weeklyTemplate: DayTemplate[];
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface DayTemplate {
+  dayOfWeek: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  name?: string;
+  exerciseTemplates: ExerciseTemplate[];
+}
+
 
 export interface Exercise {
   _id: string;

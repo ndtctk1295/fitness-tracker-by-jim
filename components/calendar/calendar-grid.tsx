@@ -6,6 +6,7 @@ import { format, isSameDay, isSameMonth, isBefore, startOfDay } from "date-fns";
 import { isToday } from "@/lib/utils/calendar/date-utils";
 import { categorizeExercises, getMaxExercisesToShow, getWorkoutPlanTemplateExercises, hasValidWorkoutPlanId } from "@/lib/utils/calendar/exercise-utils";
 import { useCalendarStore, useCalendarData } from "@/lib/stores/calendar-store";
+import { useEffect } from "react";
 
 interface CalendarGridProps {
   scheduledExercises: any[];
@@ -20,6 +21,16 @@ export function CalendarGrid({
   activePlan,
   onSelectDate
 }: CalendarGridProps) {
+  // Debug when scheduledExercises changes
+  useEffect(() => {
+    console.log('📅 [CalendarGrid] Scheduled exercises updated:', scheduledExercises.length);
+    // Only log August 8th exercises for our test
+    const aug8Exercises = scheduledExercises.filter(ex => ex.date === '2025-08-08');
+    if (aug8Exercises.length > 0) {
+      console.log('📅 [CalendarGrid] August 8th exercises:', aug8Exercises);
+    }
+  }, [scheduledExercises]);
+  
   // Get state from calendar store
   const { 
     currentDate,
@@ -34,10 +45,14 @@ export function CalendarGrid({
   const maxExercisesToShow = getMaxExercisesToShow(calendarDisplayMode, calendarView as 'month' | 'week');
 
   return (
-    <div className="grid grid-cols-7 gap-2">
+    <div className="grid grid-cols-7 gap-2" data-testid="calendar-grid">
       {/* Day headers */}
       {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-        <div key={day} className="text-center text-sm font-medium py-1 min-w-[90px]">
+        <div 
+          key={day} 
+          className={`text-center text-sm font-medium py-1 min-w-[90px] ${calendarView === 'week' ? 'data-week-day' : ''}`}
+          data-testid={calendarView === 'week' ? 'calendar-week-day' : undefined}
+        >
           {day}
         </div>
       ))}
@@ -90,6 +105,8 @@ export function CalendarGrid({
               ${!isCurrentMonth && calendarView === 'month' ? 'opacity-30' : ''}
               ${isToday(date) ? 'bg-primary/5 border-primary/30' : ''}
             `}
+            data-testid="calendar-date-cell"
+            data-date={format(date, 'yyyy-MM-dd')}
           >
             <div className="flex flex-col h-full">
               {/* Date number */}

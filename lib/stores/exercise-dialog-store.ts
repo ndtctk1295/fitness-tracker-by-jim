@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { format } from 'date-fns'
 import { lbsToKg } from '@/lib/utils/weight-conversion'
-import { useScheduledExerciseStore } from './scheduled-exercise-store'
 
 interface ExerciseDialogState {
   // Form fields
@@ -33,10 +32,10 @@ interface ExerciseDialogState {
   // Business logic
   resetForm: () => void
   loadExerciseForEditing: (exercise: any, weightUnit: string) => void
-  addExercise: (date: Date, weightUnit: string) => Promise<void>
-  updateExercise: (weightUnit: string) => Promise<void>
-  deleteExercise: (id: string) => Promise<void>
-  clearExercises: (date: Date) => Promise<void>
+  addExercise: (date: Date, weightUnit: string) => Promise<any>
+  updateExercise: (weightUnit: string) => Promise<any>
+  deleteExercise: (id: string) => Promise<any>
+  clearExercises: (date: Date) => Promise<any>
   startEditingExercise: (id: string) => void
   cancelEditing: () => void
   calculateTotalWeightFromPlates: () => void
@@ -110,9 +109,9 @@ export const useExerciseDialogStore = create<ExerciseDialogState>((set, get) => 
       set({ isLoading: true });
       try {
         const weightInKg = weightUnit === 'lbs' ? lbsToKg(Number(weight)) : Number(weight);
-        const { addScheduledExercise } = useScheduledExerciseStore.getState();
         
-        await addScheduledExercise({
+        // Return the data to be processed by the component
+        const exerciseData = {
           exerciseId: selectedExerciseId,
           categoryId: selectedCategoryId,
           sets: Number(sets),
@@ -120,16 +119,20 @@ export const useExerciseDialogStore = create<ExerciseDialogState>((set, get) => 
           weight: weightInKg,
           weightPlates: weightPlates,
           date: format(date, 'yyyy-MM-dd'),
-        });
+        };
         
         set({ activeTab: 'list' });
         get().resetForm();
+        
+        return exerciseData;
       } catch (error) {
-        console.error('Error adding scheduled exercise:', error);
+        console.error('Error preparing scheduled exercise:', error);
+        throw error;
       } finally {
         set({ isLoading: false });
       }
     }
+    return null;
   },
   
   updateExercise: async (weightUnit) => {
@@ -147,41 +150,47 @@ export const useExerciseDialogStore = create<ExerciseDialogState>((set, get) => 
       set({ isLoading: true });
       try {
         const weightInKg = weightUnit === 'lbs' ? lbsToKg(Number(weight)) : Number(weight);
-        const { updateScheduledExercise } = useScheduledExerciseStore.getState();
         
-        await updateScheduledExercise(editingExerciseId, {
-          exerciseId: selectedExerciseId,
-          categoryId: selectedCategoryId,
-          sets: Number(sets),
-          reps: Number(reps),
-          weight: weightInKg,
-          weightPlates: weightPlates,
-        });
+        const updateData = {
+          id: editingExerciseId,
+          updates: {
+            exerciseId: selectedExerciseId,
+            categoryId: selectedCategoryId,
+            sets: Number(sets),
+            reps: Number(reps),
+            weight: weightInKg,
+            weightPlates: weightPlates,
+          }
+        };
         
         set({ 
           editingExerciseId: null,
           activeTab: 'list'
         });
+        
+        return updateData;
       } catch (error) {
-        console.error('Error updating scheduled exercise:', error);
+        console.error('Error preparing update data:', error);
+        throw error;
       } finally {
         set({ isLoading: false });
       }
     }
+    return null;
   },
   
   deleteExercise: async (id) => {
     set({ isLoading: true });
     try {
-      const { deleteScheduledExercise } = useScheduledExerciseStore.getState();
-      await deleteScheduledExercise(id);
-      
       const { editingExerciseId } = get();
       if (editingExerciseId === id) {
         set({ editingExerciseId: null });
       }
+      
+      return { id };
     } catch (error) {
-      console.error('Error deleting scheduled exercise:', error);
+      console.error('Error preparing delete:', error);
+      throw error;
     } finally {
       set({ isLoading: false });
     }
@@ -190,11 +199,12 @@ export const useExerciseDialogStore = create<ExerciseDialogState>((set, get) => 
   clearExercises: async (date) => {
     set({ isLoading: true });
     try {
-      const { deleteScheduledExercisesByDate } = useScheduledExerciseStore.getState();
-      await deleteScheduledExercisesByDate(date);
+      // Return date for component to handle clearing
       set({ editingExerciseId: null });
+      return { date };
     } catch (error) {
-      console.error('Error clearing scheduled exercises:', error);
+      console.error('Error preparing clear exercises:', error);
+      throw error;
     } finally {
       set({ isLoading: false });
     }

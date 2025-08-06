@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Chest",
+    "color": "#ef4444",
+    "description": "Chest exercises for building pectoral muscles"
+  },
+  {
+    "name": "Back",
+    "color": "#10b981", 
+    "description": "Back exercises for latissimus dorsi and rhomboids"
+  },
+  {
+    "name": "Legs",
+    "color": "#3b82f6",
+    "description": "Lower body exercises including quads, hamstrings, and glutes"
+  },
+  {
+    "name": "Arms",
+    "color": "#f59e0b",
+    "description": "Biceps, triceps, and forearm exercises"
+  },
+  {
+    "name": "Shoulders",
+    "color": "#8b5cf6",
+    "description": "Deltoid and rotator cuff exercises"
+  },
+  {
+    "name": "Core",
+    "color": "#06b6d4",
+    "description": "Abdominal and core stability exercises"
+  }
+]

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { TrendingUp, TrendingDown, Calendar, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { format, subDays, eachDayOfInterval, isSameDay } from "date-fns";
 import { WorkoutPlan } from "@/lib/services/clients-service/workout-plan-service";
-import { useScheduledExerciseStore } from "@/lib/stores/scheduled-exercise-store";
+import { useScheduledExercises } from "@/lib/queries";
 import { useExerciseStore } from "@/lib/stores/exercise-store";
 
 interface ProgressionGraphProps {
@@ -35,18 +35,15 @@ interface ExerciseProgress {
 }
 
 export function ProgressionGraph({ workoutPlan }: ProgressionGraphProps) {
-  const { scheduledExercises } = useScheduledExerciseStore();
+  const { data: scheduledExercisesData } = useScheduledExercises();
+  const scheduledExercises = scheduledExercisesData || [];
   const { exercises } = useExerciseStore();
   const [timeframe, setTimeframe] = useState<'week' | 'month' | '3months'>('month');
   const [view, setView] = useState<'completion' | 'exercises'>('completion');
   const [progressData, setProgressData] = useState<ProgressData[]>([]);
   const [exerciseProgress, setExerciseProgress] = useState<ExerciseProgress[]>([]);
 
-  useEffect(() => {
-    calculateProgressData();
-  }, [workoutPlan, scheduledExercises, timeframe]);
-
-  const calculateProgressData = () => {
+  const calculateProgressData = useCallback(() => {
     const now = new Date();
     let startDate: Date;
     
@@ -141,7 +138,11 @@ export function ProgressionGraph({ workoutPlan }: ProgressionGraphProps) {
     });
 
     setExerciseProgress(exerciseProgressArray);
-  };
+  }, [workoutPlan, scheduledExercisesData, exercises, timeframe]);
+
+  useEffect(() => {
+    calculateProgressData();
+  }, [calculateProgressData]);
 
   const getMaxValue = () => {
     return Math.max(...progressData.map(d => d.completionRate), 100);

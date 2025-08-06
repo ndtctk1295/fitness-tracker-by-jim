@@ -360,21 +360,32 @@ export default function TimerPage() {
             isAutoSwitchEnabled={isAutoSwitchEnabled}
             setIsAutoSwitchEnabled={setIsAutoSwitchEnabled}
           />
-          <div className="mt-6">
+          <div className="mt-6" data-testid="exercise-list">
             <h2 className="text-xl font-semibold mb-4">Today's Exercises</h2>
-            <MemoizedExerciseList
-              title="Today's Workout"
-              description="These are the exercises scheduled for today"
-              exercises={exercises}
-              categories={[]} // No categories needed for now
-              scheduledExercises={scheduledExercises}
-              orderedExerciseIds={orderedExerciseIds}
-              currentExerciseIndex={0}
-              sensors={sensors}
-              handleDragEnd={handleDragEndWrapper}
-              isTimerActive={false}
-              orderedExercises={orderedExercises}
-            />
+            {todaysExercises.length > 0 ? (
+              <>
+                <div data-testid="exercise-count" className="text-sm text-muted-foreground mb-2">
+                  {todaysCompletedExercisesCount} of {todaysExercises.length} exercises completed
+                </div>
+                <MemoizedExerciseList
+                  title="Today's Workout"
+                  description="These are the exercises scheduled for today"
+                  exercises={exercises}
+                  categories={[]} // No categories needed for now
+                  scheduledExercises={scheduledExercises}
+                  orderedExerciseIds={orderedExerciseIds}
+                  currentExerciseIndex={0}
+                  sensors={sensors}
+                  handleDragEnd={handleDragEndWrapper}
+                  isTimerActive={false}
+                  orderedExercises={orderedExercises}
+                />
+              </>
+            ) : (
+              <div data-testid="empty-exercise-list" className="text-center p-6 text-muted-foreground">
+                No exercises scheduled for today
+              </div>
+            )}
           </div>
         </>
       ) : (

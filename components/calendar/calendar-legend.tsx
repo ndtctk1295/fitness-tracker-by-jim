@@ -6,7 +6,7 @@ interface CalendarLegendProps {
 
 export function CalendarLegend({ activePlanName }: CalendarLegendProps) {
   return (
-    <div className="mb-4 p-3 bg-muted/30 rounded-lg">
+    <div className="mb-4 p-3 bg-muted/30 rounded-lg" data-testid="calendar-legend">
       <div className="flex flex-wrap items-center gap-4 text-sm">
         <span className="font-medium text-muted-foreground">Exercise Types:</span>
         <div className="flex items-center gap-2">
