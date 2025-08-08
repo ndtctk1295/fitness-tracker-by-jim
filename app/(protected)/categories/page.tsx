@@ -2,10 +2,10 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { useExerciseStore } from '@/lib/stores/exercise-store'
-
+import { useExerciseData } from '@/lib/hooks/data-hook/use-exercise-data'
 export default function CategoriesPage() {
-  const { categories } = useExerciseStore()
-  
+  const { categories } = useExerciseData()
+
   return (
     <div className="py-10">
       <h1 className="text-3xl font-bold mb-6">Exercise Categories</h1>

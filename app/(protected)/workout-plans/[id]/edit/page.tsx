@@ -5,8 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save } from 'lucide-react';
-import { useWorkoutPlanStore } from '@/lib/stores/workout-plan-store';
-import { useWorkoutPlanById } from '@/lib/queries';
+import { useWorkoutPlanData } from '@/lib/hooks/data-hook/use-workout-plan-data';
+import { useWorkoutPlanById } from '@/lib/utils/queries/workout-plans-queries';
 import { useApiToast } from '@/lib/hooks/use-api-toast';
 import { WorkoutPlan } from '@/lib/services/clients-service/workout-plan-service';
 import { BasicInfoStep } from '@/components/workout-plans/wizard/basic-info-step';
@@ -43,7 +43,7 @@ export default function EditWorkoutPlanPage() {
     weeklySchedule: {}
   });
   
-  const { updatePlan } = useWorkoutPlanStore();
+  const { updatePlan } = useWorkoutPlanData();
   const { showSuccessToast, showErrorToast } = useApiToast();
 
   // Transform plan data to edit format when plan is loaded

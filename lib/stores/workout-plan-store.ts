@@ -1,213 +1,145 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { 
-  useWorkoutPlans, 
-  useActiveWorkoutPlan, 
-  useWorkoutPlanById,
-  useCreateWorkoutPlan,
-  useUpdateWorkoutPlan,
-  useDeleteWorkoutPlan,
-  useActivateWorkoutPlan,
-  useDeactivateWorkoutPlan
-} from '@/lib/queries';
+import { create } from 'zustand';
 
-// UI state interface
+// UI state interface - Workout Plan specific UI state only
 interface WorkoutPlanUIState {
+  // Selection state
   selectedPlanId: string | null;
+  
+  // Dialog states
   showCreateDialog: boolean;
   showEditDialog: boolean;
   showDeleteDialog: boolean;
   showConflictDialog: boolean;
+  
+  // Conflict data for resolution dialogs
   conflictData: any;
 }
 
-// React Query-based workout plan store hook
-export const useWorkoutPlanStore = () => {
-  // UI state
-  const [uiState, setUIState] = useState<WorkoutPlanUIState>({
+interface WorkoutPlanUIActions {
+  // Selection actions
+  setSelectedPlan: (id: string | null) => void;
+  
+  // Dialog actions
+  setShowCreateDialog: (show: boolean) => void;
+  setShowEditDialog: (show: boolean) => void;
+  setShowDeleteDialog: (show: boolean) => void;
+  setShowConflictDialog: (show: boolean) => void;
+  setConflictData: (data: any) => void;
+  
+  // Utility actions
+  reset: () => void;
+}
+
+/**
+ * Pure UI state store for workout plans
+ * Handles only workout plan-specific UI state like dialogs, selections, etc.
+ * For data operations, use the hooks from use-workout-plan-data.ts
+ */
+export const useWorkoutPlanStore = create<WorkoutPlanUIState & WorkoutPlanUIActions>((set) => ({
+  // UI State
+  selectedPlanId: null,
+  showCreateDialog: false,
+  showEditDialog: false,
+  showDeleteDialog: false,
+  showConflictDialog: false,
+  conflictData: null,
+
+  // Selection Actions
+  setSelectedPlan: (id: string | null) => 
+    set((state) => ({ ...state, selectedPlanId: id })),
+  
+  // Dialog Actions
+  setShowCreateDialog: (show: boolean) => 
+    set((state) => ({ ...state, showCreateDialog: show })),
+  
+  setShowEditDialog: (show: boolean) => 
+    set((state) => ({ ...state, showEditDialog: show })),
+  
+  setShowDeleteDialog: (show: boolean) => 
+    set((state) => ({ ...state, showDeleteDialog: show })),
+  
+  setShowConflictDialog: (show: boolean) => 
+    set((state) => ({ ...state, showConflictDialog: show })),
+  
+  setConflictData: (data: any) => 
+    set((state) => ({ ...state, conflictData: data })),
+  
+  // Reset
+  reset: () => set({
     selectedPlanId: null,
     showCreateDialog: false,
     showEditDialog: false,
     showDeleteDialog: false,
     showConflictDialog: false,
     conflictData: null,
-  });
-
-  // Use React Query hooks for data fetching
-  const workoutPlansQuery = useWorkoutPlans();
-  const activePlanQuery = useActiveWorkoutPlan();
-
-  // Mutations
-  const createPlanMutation = useCreateWorkoutPlan();
-  const updatePlanMutation = useUpdateWorkoutPlan();
-  const deletePlanMutation = useDeleteWorkoutPlan();
-  const activatePlanMutation = useActivateWorkoutPlan();
-  const deactivatePlanMutation = useDeactivateWorkoutPlan();
-
-  // Computed values
-  const workoutPlans = workoutPlansQuery.data || [];
-  const activePlan = activePlanQuery.data;
-  
-  const isLoading = workoutPlansQuery.isLoading || activePlanQuery.isLoading;
-  const error = workoutPlansQuery.error || activePlanQuery.error;
-  const initialized = !workoutPlansQuery.isLoading && !activePlanQuery.isLoading;
-
-  const isCreating = createPlanMutation.isPending;
-  const isUpdating = updatePlanMutation.isPending;
-  const isDeleting = deletePlanMutation.isPending;
-  const isActivating = activatePlanMutation.isPending;
-  const isDeactivating = deactivatePlanMutation.isPending;
-
-  // Utility functions
-  const getPlansByMode = useMemo(() => (mode: 'ongoing' | 'dated') => {
-    return workoutPlans.filter((plan: any) => plan.mode === mode);
-  }, [workoutPlans]);
-
-  const getPlansByLevel = useMemo(() => (level: 'beginner' | 'intermediate' | 'advanced') => {
-    return workoutPlans.filter((plan: any) => plan.level === level);
-  }, [workoutPlans]);
-
-  const searchPlans = useMemo(() => (query: string) => {
-    const lowercaseQuery = query.toLowerCase();
-    return workoutPlans.filter((plan: any) => 
-      plan.name.toLowerCase().includes(lowercaseQuery) ||
-      (plan.description && plan.description.toLowerCase().includes(lowercaseQuery))
-    );
-  }, [workoutPlans]);
-
-  // Action functions
-  const loadAllPlans = () => workoutPlansQuery.refetch();
-  const loadActivePlan = () => activePlanQuery.refetch();
-  const loadPlanById = (id: string) => {
-    // This would typically use useWorkoutPlanById hook
-    return Promise.resolve();
-  };
-
-  const createPlan = async (planData: any) => {
-    return createPlanMutation.mutateAsync(planData);
-  };
-
-  const updatePlan = async (id: string, updateData: any) => {
-    return updatePlanMutation.mutateAsync({ id, data: updateData });
-  };
-
-  const deletePlan = async (id: string) => {
-    return deletePlanMutation.mutateAsync(id);
-  };
-
-  const activatePlan = async (id: string) => {
-    return activatePlanMutation.mutateAsync(id);
-  };
-
-  const deactivatePlan = async (id: string) => {
-    return deactivatePlanMutation.mutateAsync(id);
-  };
-
-  const duplicatePlan = async (id: string, newName?: string) => {
-    // Implementation would depend on your API
-    return Promise.resolve();
-  };
-
-  // UI state management
-  const setSelectedPlan = (id: string | null) => {
-    setUIState(prev => ({ ...prev, selectedPlanId: id }));
-  };
-
-  const setShowCreateDialog = (show: boolean) => {
-    setUIState(prev => ({ ...prev, showCreateDialog: show }));
-  };
-
-  const setShowEditDialog = (show: boolean) => {
-    setUIState(prev => ({ ...prev, showEditDialog: show }));
-  };
-
-  const setShowDeleteDialog = (show: boolean) => {
-    setUIState(prev => ({ ...prev, showDeleteDialog: show }));
-  };
-
-  const setShowConflictDialog = (show: boolean) => {
-    setUIState(prev => ({ ...prev, showConflictDialog: show }));
-  };
-
-  const setConflictData = (data: any) => {
-    setUIState(prev => ({ ...prev, conflictData: data }));
-  };
-
-  const setError = (error: string | null) => {
-    // React Query handles errors automatically
-  };
-
-  const clearError = () => {
-    // React Query handles error clearing automatically
-  };
-
-  const initializeStore = () => {
-    return Promise.all([loadAllPlans(), loadActivePlan()]);
-  };
-
-  const reset = () => {
-    setUIState({
-      selectedPlanId: null,
-      showCreateDialog: false,
-      showEditDialog: false,
-      showDeleteDialog: false,
-      showConflictDialog: false,
-      conflictData: null,
-    });
-  };
-
-  return {
-    // Data
-    workoutPlans,
-    activePlan,
-    
-    // UI state
-    isLoading,
-    error: error?.message || null,
-    isCreating,
-    isUpdating,
-    isDeleting,
-    initialized,
-    
-    // UI state
-    selectedPlanId: uiState.selectedPlanId,
-    showCreateDialog: uiState.showCreateDialog,
-    showEditDialog: uiState.showEditDialog,
-    showDeleteDialog: uiState.showDeleteDialog,
-    showConflictDialog: uiState.showConflictDialog,
-    conflictData: uiState.conflictData,
-    
-    // Actions
-    initializeStore,
-    loadAllPlans,
-    loadActivePlan,
-    loadPlanById,
-    createPlan,
-    updatePlan,
-    deletePlan,
-    duplicatePlan,
-    activatePlan,
-    deactivatePlan,
-    
-    // Utility functions
-    getPlansByMode,
-    getPlansByLevel,
-    searchPlans,
-    
-    // UI actions
-    setSelectedPlan,
-    setShowCreateDialog,
-    setShowEditDialog,
-    setShowDeleteDialog,
-    setShowConflictDialog,
-    setConflictData,
-    setError,
-    clearError,
-    
-    // Reset
-    reset,
-  };
-};
+  }),
+}));
 
 export default useWorkoutPlanStore;
+
+// ===== BACKWARDS COMPATIBILITY LAYER =====
+// For components that still use the old pattern
+// TODO: Remove after migration to new pattern is complete
+
+import { useWorkoutPlanData } from '@/lib/hooks/data-hook/use-workout-plan-data';
+
+/**
+ * @deprecated Use useWorkoutPlanStore for UI state and useWorkoutPlanData for data operations
+ * This is a compatibility wrapper that mimics the old store API
+ */
+export const useWorkoutPlanStoreCompatibility = () => {
+  const uiStore = useWorkoutPlanStore();
+  const dataHook = useWorkoutPlanData();
+  
+  return {
+    // Data (from data hook)
+    workoutPlans: dataHook.workoutPlans,
+    activePlan: dataHook.activePlan,
+    isLoading: dataHook.isLoading,
+    error: dataHook.error,
+    initialized: dataHook.initialized,
+    isCreating: dataHook.isCreating,
+    isUpdating: dataHook.isUpdating,
+    isDeleting: dataHook.isDeleting,
+    
+    // UI state (from UI store)
+    selectedPlanId: uiStore.selectedPlanId,
+    showCreateDialog: uiStore.showCreateDialog,
+    showEditDialog: uiStore.showEditDialog,
+    showDeleteDialog: uiStore.showDeleteDialog,
+    showConflictDialog: uiStore.showConflictDialog,
+    conflictData: uiStore.conflictData,
+    
+    // Actions (combined)
+    loadAllPlans: dataHook.loadAllPlans,
+    loadActivePlan: dataHook.loadActivePlan,
+    createPlan: dataHook.createPlan,
+    updatePlan: dataHook.updatePlan,
+    deletePlan: dataHook.deletePlan,
+    activatePlan: dataHook.activatePlan,
+    deactivatePlan: dataHook.deactivatePlan,
+    
+    // UI actions
+    setSelectedPlan: uiStore.setSelectedPlan,
+    setShowCreateDialog: uiStore.setShowCreateDialog,
+    setShowEditDialog: uiStore.setShowEditDialog,
+    setShowDeleteDialog: uiStore.setShowDeleteDialog,
+    setShowConflictDialog: uiStore.setShowConflictDialog,
+    setConflictData: uiStore.setConflictData,
+    
+    // Legacy utility functions
+    getPlansByMode: dataHook.getPlansByMode,
+    getPlansByLevel: dataHook.getPlansByLevel,
+    searchPlans: dataHook.searchPlans,
+    
+    // Other legacy functions
+    initializeStore: () => dataHook.refetch(),
+    reset: uiStore.reset,
+    setError: () => {}, // No-op, React Query handles errors
+    clearError: () => {}, // No-op, React Query handles errors
+    loadPlanById: () => Promise.resolve(), // Use useWorkoutPlanById hook instead
+    duplicatePlan: () => Promise.resolve(), // To be implemented
+  };
+};

@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { useApiToast } from '@/lib/hooks/use-api-toast';
 
 import {
@@ -66,6 +66,11 @@ interface CalendarStoreState {
   // Utility methods
   getDateRange: () => { start: Date; end: Date };
   getCalendarDays: () => Date[];
+  
+  // Enhanced date range methods
+  getFormattedDateRange: () => { startDate: string; endDate: string };
+  getCurrentDateString: () => string;
+  getSelectedDateString: () => string;
 }
 
 // Create calendar store
@@ -126,7 +131,43 @@ export const useCalendarStore = create<CalendarStoreState>()(
       getCalendarDays: () => {
         const { currentDate, calendarView } = get();
         return getCalendarDays(currentDate, calendarView);
-      }
+      },
+      
+      // Enhanced date range methods for easier integration
+      getFormattedDateRange: () => {
+        const { currentDate, calendarView } = get();
+        const safeDate = currentDate || new Date();
+        
+        if (calendarView === 'month') {
+          const startOfMonthDate = startOfMonth(safeDate);
+          const endOfMonthDate = endOfMonth(safeDate);
+          return {
+            startDate: format(startOfMonthDate, 'yyyy-MM-dd'),
+            endDate: format(endOfMonthDate, 'yyyy-MM-dd')
+          };
+        } else if (calendarView === 'week') {
+          const startOfWeekDate = startOfWeek(safeDate, { weekStartsOn: 0 }); // Sunday
+          const endOfWeekDate = endOfWeek(safeDate, { weekStartsOn: 0 });
+          return {
+            startDate: format(startOfWeekDate, 'yyyy-MM-dd'),
+            endDate: format(endOfWeekDate, 'yyyy-MM-dd')
+          };
+        } else {
+          // Default to current date for day view
+          const dateStr = format(safeDate, 'yyyy-MM-dd');
+          return { startDate: dateStr, endDate: dateStr };
+        }
+      },
+      
+      getCurrentDateString: () => {
+        const { currentDate } = get();
+        return format(currentDate || new Date(), 'yyyy-MM-dd');
+      },
+      
+      getSelectedDateString: () => {
+        const { selectedDate } = get();
+        return format(selectedDate || new Date(), 'yyyy-MM-dd');
+      },
     }),
     {
       name: 'calendar-store',
@@ -136,30 +177,19 @@ export const useCalendarStore = create<CalendarStoreState>()(
         calendarView: state.calendarView,
         calendarDisplayMode: state.calendarDisplayMode
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Ensure dates are properly converted back to Date objects
+          if (state.currentDate && !(state.currentDate instanceof Date)) {
+            state.currentDate = new Date(state.currentDate);
+          }
+          if (state.selectedDate && !(state.selectedDate instanceof Date)) {
+            state.selectedDate = new Date(state.selectedDate);
+          }
+        }
+      },
     }
   )
 );
-
-// Hook for quick calendar data access
-export const useCalendarData = () => {
-  const { 
-    currentDate, 
-    calendarView, 
-    getDateRange, 
-    getCalendarDays 
-  } = useCalendarStore();
-  
-  const dateRange = getDateRange();
-  const days = getCalendarDays();
-  
-  return {
-    currentDate,
-    calendarView,
-    dateRange,
-    days,
-    formattedStartDate: format(dateRange.start, 'yyyy-MM-dd'),
-    formattedEndDate: format(dateRange.end, 'yyyy-MM-dd')
-  };
-};
 
 export default useCalendarStore;

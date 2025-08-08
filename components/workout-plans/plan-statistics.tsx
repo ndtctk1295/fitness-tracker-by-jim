@@ -8,8 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns";
 import { WorkoutPlan } from "@/lib/services/clients-service/workout-plan-service";
-import { useScheduledExercises } from "@/lib/queries";
-
+import { useScheduledExercises } from "@/lib/utils/queries/scheduled-exercises-queries";
 interface PlanStatisticsProps {
   workoutPlan: WorkoutPlan;
 }

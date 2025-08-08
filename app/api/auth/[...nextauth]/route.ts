@@ -10,7 +10,7 @@ import { NextAuthOptions } from 'next-auth';
 import NextAuth from 'next-auth/next';
 import connectToMongoDB from '@/lib/mongodb';
 import { mongoClientPromise } from '@/lib/mongodb';
-import { rateLimitService } from '@/lib/services/rate-limit-service';
+import { rateLimitService } from '@/lib/services/server-service/rate-limit-service';
 import AuthError from "next-auth"
 // import AuthError from '@/app/auth/error/page';
 // Extend session types to include custom fields

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { generateExercisesForAllActivePlans } from '@/lib/services/clients-service/exercise-generation-service';
+import { generateExercisesForAllActivePlans } from '@/lib/services/server-service/exercise-generation-service';
 
 /**
  * CRON endpoint for automatically generating scheduled exercises for all active workout plans

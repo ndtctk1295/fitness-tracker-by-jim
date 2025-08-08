@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useExerciseStore } from "@/lib/stores/exercise-store";
+import { useExerciseData } from "@/lib/hooks/data-hook/use-exercise-data";
 import { Exercise } from "@/lib/types";
 import { WorkoutPlan } from "@/lib/services/clients-service/workout-plan-service";
 
@@ -33,7 +33,7 @@ const DAYS = [
 ];
 
 export function WeeklyScheduleGrid({ workoutPlan, onUpdatePlan, readOnly = false }: WeeklyScheduleGridProps) {
-  const { exercises } = useExerciseStore();
+  const { exercises } = useExerciseData();
   const [editingExercise, setEditingExercise] = useState<any>(null);
   const [showExerciseDialog, setShowExerciseDialog] = useState(false);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);

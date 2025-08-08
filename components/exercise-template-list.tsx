@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/select';
 
 import { useExerciseTemplates } from '@/lib/hooks/use-exercise-templates';
-import { useExerciseStore } from '@/lib/stores/exercise-store';
+import { useExerciseData } from '@/lib/hooks/data-hook/use-exercise-data';
 import { kgToLbs } from '@/lib/utils/weight-conversion';
 import { useWeightStore } from '@/lib/stores/weight-store';
 import { ExerciseTemplateListProps } from '@/lib/types';
@@ -41,7 +41,7 @@ export function ExerciseTemplateList({ selectedDate, onTemplateApplied }: Exerci
     isLoading
   } = useExerciseTemplates();
 
-  const { exercises, categories } = useExerciseStore();
+  const { exercises, categories } = useExerciseData();
   const { weightUnit } = useWeightStore();
 
   // Dialog states

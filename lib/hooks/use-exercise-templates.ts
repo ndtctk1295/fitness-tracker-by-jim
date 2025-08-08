@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useExerciseStore } from '@/lib/stores/exercise-store';
+import { useExerciseData } from '@/lib/hooks/data-hook/use-exercise-data';
 import { useScheduledExerciseStore } from '@/lib/stores/scheduled-exercise-store';
+import { useScheduledExerciseData } from './data-hook/use-scheduled-exercise-data';
 import { useToast } from '@/lib/hooks/use-toast';
 import { format } from 'date-fns';
 import { scheduledExerciseService } from '@/lib/services/clients-service/scheduled-exercise-service';
@@ -16,14 +17,13 @@ export function useExerciseTemplates() {  const {
     categories,
     isLoading: exerciseLoading,
     error: exerciseError
-  } = useExerciseStore();
+  } = useExerciseData();
 
   const {
-    scheduledExercises,
+    exercises: scheduledExercises,
     isLoading: scheduledLoading,
     error: scheduledError,
-    addScheduledExercise
-  } = useScheduledExerciseStore();
+  } = useScheduledExerciseData();
   
   const { toast } = useToast();
   const [templates, setTemplates] = useState<ExerciseTemplate[]>([]);

@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CalendarDays, Zap, CheckCircle, AlertCircle } from "lucide-react";
-import { useWorkoutPlanStore } from "@/lib/stores/workout-plan-store";
-import { useScheduledExerciseStore } from "@/lib/stores/scheduled-exercise-store";
+import { useWorkoutPlanData } from '@/lib/hooks/data-hook/use-workout-plan-data';
+import { useScheduledExerciseData } from "@/lib/hooks/data-hook/use-scheduled-exercise-data";
+import { scheduledExerciseUtils } from '@/lib/utils/scheduled-exercise-utils';
 import { ExerciseConversionGuide } from "@/components/workout-plans/exercise-conversion-guide";
 import { WorkoutPlanCard } from "@/components/workout-plans/workout-plan-card";
 
@@ -17,14 +18,20 @@ export default function ExerciseConversionDemoPage() {
     activePlan, 
     isLoading, 
     error, 
-    initializeStore,
-    generateScheduledExercises 
-  } = useWorkoutPlanStore();
+    refetch: initializeStore
+    // Note: generateScheduledExercises moved to React Query mutations
+  } = useWorkoutPlanData();
   
+  // Get all scheduled exercises without date filtering for demo
   const { 
-    scheduledExercises, 
-    getExercisesByDateRange 
-  } = useScheduledExerciseStore();
+    exercises: scheduledExercises,
+    isLoading: scheduledLoading,
+    error: scheduledError 
+  } = useScheduledExerciseData();
+
+  // Use utils directly for filtering
+  const getExercisesByDateRange = (startDate: string, endDate: string) => 
+    scheduledExerciseUtils.getExercisesByDateRange(scheduledExercises, startDate, endDate);
 
   const [demoResult, setDemoResult] = useState<{
     success: boolean;
@@ -46,20 +53,13 @@ export default function ExerciseConversionDemoPage() {
       return;
     }
 
-    try {
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(startDate.getDate() + 6); // Next 7 days
-
-      const result = await generateScheduledExercises(startDate, endDate);
-      setDemoResult(result);
-    } catch (error) {
-      setDemoResult({
-        success: false,
-        count: 0,
-        message: error instanceof Error ? error.message : "Failed to generate exercises"
-      });
-    }
+    // Note: Exercise generation has been moved to server-side logic
+    // This demo would need to be updated to use the new API patterns
+    setDemoResult({
+      success: false,
+      count: 0,
+      message: "Exercise generation demo temporarily disabled - functionality moved to React Query patterns"
+    });
   };
 
   // Get exercises for the next week to show current scheduled count

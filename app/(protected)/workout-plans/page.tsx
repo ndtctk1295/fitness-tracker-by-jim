@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { WorkoutPlanCard } from '@/components/workout-plans/workout-plan-card';
 import { WorkoutPlanWizard } from '@/components/workout-plans/workout-plan-wizard';
-import { useWorkoutPlanStore } from '@/lib/stores/workout-plan-store';
+import { useWorkoutPlanData } from '@/lib/hooks/data-hook/use-workout-plan-data';
 import { useApiToast } from '@/lib/hooks/use-api-toast';
 
 export default function WorkoutPlansPage() {
@@ -21,7 +21,7 @@ export default function WorkoutPlansPage() {
     error,
     initialized,
     loadAllPlans
-  } = useWorkoutPlanStore();
+  } = useWorkoutPlanData();
   
   const { showSuccessToast, showErrorToast } = useApiToast();
   

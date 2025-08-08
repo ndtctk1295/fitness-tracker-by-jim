@@ -20,9 +20,9 @@ import {
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { formatTime } from "@/lib/stores/timer-store";
-import { useExerciseStore } from "@/lib/stores/exercise-store";
-import { useUserExercisePreferenceStore } from "@/lib/stores/user-exercise-preference-store";
-import { useScheduledExerciseStore } from "@/lib/stores/scheduled-exercise-store";
+import { useExerciseData } from "@/lib/hooks/data-hook/use-exercise-data";
+import { useScheduledExerciseData, useScheduledExerciseMutations } from "@/lib/hooks/data-hook/use-scheduled-exercise-data";
+import { useUserExercisePreferenceData } from "@/lib/hooks/data-hook/use-user-exercise-preference-data";
 import { TimerSetup } from "@/components/timer/TimerSetup";
 import { ActiveTimer } from "@/components/timer/ActiveTimer";
 import { MemoizedExerciseList } from "@/components/timer/MemoizedComponents";
@@ -82,32 +82,41 @@ export default function TimerPage() {
   const [timerStrategies, setTimerStrategies] = useState<TimerStrategy[]>([]);
   const [activeTimer, setActiveTimer] =
     useState<ActiveTimerState>(initialActiveTimer);
-  const [isLoading, setIsLoading] = useState(true); // Get exercise data from store
+  const [isLoading, setIsLoading] = useState(true); 
+  
+  // Get exercise data using React Query pattern
   const {
     exercises,
     isLoading: isExerciseLoading,
     error: exerciseError,
-  } = useExerciseStore();
+  } = useExerciseData();
+  
   const {
     preferences,
     markAsUsed,
     isLoading: isPreferencesLoading,
     error: preferencesError,
-  } = useUserExercisePreferenceStore();
+  } = useUserExercisePreferenceData();
+  
+  // Get scheduled exercises data with today's filter
+  const today = format(new Date(), "yyyy-MM-dd");
+  const dateRange = useMemo(() => ({
+    startDate: today,
+    endDate: today
+  }), [today]);
+  
   const {
-    scheduledExercises,
-    calendarView,
-    initialized: scheduledInitialized,
+    exercises: scheduledExercises,
+    selectors,
     isLoading: isScheduledLoading,
     error: scheduledError,
-    markExerciseCompleted,
-  } = useScheduledExerciseStore();
-  // Set today's date for fetching exercises
-  const today = format(new Date(), "yyyy-MM-dd");
-  // Filter scheduled exercises for today
-  const todaysExercises = scheduledExercises.filter(
-    (ex: any) => ex.date === today
-  );
+  } = useScheduledExerciseData(dateRange);
+  
+  // Get today's exercises using selector
+  const todaysExercises = useMemo(() => selectors.byDate(today), [selectors, today]);
+  
+  // Get mutations for updating exercises
+  const { markCompleted: markExerciseCompleted } = useScheduledExerciseMutations();
 
   // Calculate completed exercises count
   const todaysCompletedExercisesCount = useMemo(() => {

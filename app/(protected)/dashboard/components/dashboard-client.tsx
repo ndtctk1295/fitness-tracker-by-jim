@@ -10,12 +10,13 @@ import { navigateTo } from '@/lib/utils/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TimerSummary } from '@/components/timer-summary';
-import { useExerciseStore } from '@/lib/stores/exercise-store';
-import { useUserExercisePreferenceStore } from '@/lib/stores/user-exercise-preference-store';
-import { useScheduledExerciseStore } from '@/lib/stores/scheduled-exercise-store';
+import { useUserExercisePreferenceData } from '@/lib/hooks/data-hook/use-user-exercise-preference-data';
+
 import { useTimerStore } from '@/lib/stores/timer-store';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSession } from 'next-auth/react';
+import { useExerciseData } from '@/lib/hooks/data-hook/use-exercise-data';
+import { useScheduledExerciseData } from '@/lib/hooks/data-hook/use-scheduled-exercise-data';
 interface DashboardClientProps {
   session: Session;
 }
@@ -29,12 +30,13 @@ export default function DashboardClient({ session }: DashboardClientProps) {
     userId: session?.user?.id
   });
   
-  const { exercises, categories, isLoading: exercisesLoading } = useExerciseStore();
+  const { exercises, categories, isLoading: exercisesLoading } = useExerciseData();
   const { 
     preferences, 
-    isLoading: preferencesLoading 
-  } = useUserExercisePreferenceStore();
-  const { scheduledExercises } = useScheduledExerciseStore();
+    isLoading: preferencesLoading,
+    selectors
+  } = useUserExercisePreferenceData();
+  const { exercises: scheduledExercises } = useScheduledExerciseData();
   const { activeTimer } = useTimerStore();
   
   // Current date and week
@@ -46,12 +48,9 @@ export default function DashboardClient({ session }: DashboardClientProps) {
     (exercise: any) => exercise.date === format(today, 'yyyy-MM-dd')
   );
   
-  // Extract preference data
-  const favoriteExercises = preferences.filter((p: any) => p.status === 'favorite');
-  const recentExercises = preferences
-    .filter((p: any) => p.lastUsed)
-    .sort((a: any, b: any) => new Date(b.lastUsed!).getTime() - new Date(a.lastUsed!).getTime())
-    .slice(0, 10);
+  // Extract preference data using enhanced selectors
+  const favoriteExercises = selectors.favoriteExercises;
+  const recentExercises = selectors.recentlyUsed;
   
   // Get exercises scheduled for each day of the week
   const weekDays = Array.from({ length: 7 }, (_, index) => {
@@ -201,7 +200,7 @@ export default function DashboardClient({ session }: DashboardClientProps) {
                   day.exerciseCount > 0 ? 'bg-green-50 border-green-200' : ''
                 }`}
               >
-                <div className="font-medium text-sm">{day.day}</div>
+                <div className="font-medium text-sm text-muted-foreground">{day.day}</div>
                 <div className="text-xs text-muted-foreground">{day.dayOfMonth}</div>
                 <div className="mt-1 flex items-center">
                   <CheckCircle className="h-3 w-3 mr-1 text-green-500" />

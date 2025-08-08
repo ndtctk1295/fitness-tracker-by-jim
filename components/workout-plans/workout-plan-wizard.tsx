@@ -14,7 +14,7 @@ import { BasicInfoStep } from './wizard/basic-info-step';
 import { ModeAndDatesStep } from './wizard/mode-and-dates-step';
 import { WeeklyTemplateStep } from './wizard/weekly-template-step';
 import { ReviewStep } from './wizard/review-step';
-import { useWorkoutPlanStore } from '@/lib/stores/workout-plan-store';
+import { useWorkoutPlanData } from '@/lib/hooks/data-hook/use-workout-plan-data';
 import { useApiToast } from '@/lib/hooks/use-api-toast';
 
 interface WorkoutPlanWizardProps {
@@ -66,7 +66,7 @@ export function WorkoutPlanWizard({
     weeklySchedule: {}
   });
 
-  const { createPlan } = useWorkoutPlanStore();
+  const { createPlan } = useWorkoutPlanData();
   const { showErrorToast } = useApiToast();
 
   const updateWizardData = (updates: Partial<WizardData>) => {

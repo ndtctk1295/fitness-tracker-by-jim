@@ -1,58 +1,50 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-
-import { useScheduledExerciseStore } from '@/lib/stores/scheduled-exercise-store';
-import { useExerciseStore } from '@/lib/stores/exercise-store';
+import { useScheduledExerciseData } from '@/lib/hooks/data-hook/use-scheduled-exercise-data';
+import { exerciseUtils } from '@/lib/utils/exercise-utils';
 import { HistoryStatsCards } from '@/components/history/history-stats-cards';
 import { HistoryDataTable } from '@/components/history/history-data-table';
 import { createColumns } from '@/components/history/data-table-columns';
 import { EnrichedScheduledExercise } from '@/components/history/types';
+import { useExerciseData } from '@/lib/hooks/data-hook/use-exercise-data';
+export default function HistoryPage() {
+  // Store state for scheduled exercises
 
-export default function HistoryPage() {  // Store state
+    const { 
+    exercises, 
+    categories, 
+    isLoading, 
+    filters, 
+    error,
+    setFilters 
+  } = useExerciseData();
+
   const {
-    scheduledExercises,
+    exercises: scheduledExercises,
     isLoading: scheduledLoading,
     error: scheduledError,
-    fetchAll: fetchAllScheduled,
-    initialized: scheduledInitialized,
-    markExerciseCompleted
-  } = useScheduledExerciseStore();
+    markExerciseCompleted: _markExerciseCompleted
+  } = useScheduledExerciseData();
 
-  const {
-    exercises,
-    categories,
-    isLoading: exerciseLoading,
-    error: exerciseError,
-    getCategoryById,
-    getExerciseById
-  } = useExerciseStore();
-    // Fetch all scheduled exercises on component mount
-  useEffect(() => {
-    console.debug('[HistoryPage] Component mounted, state:', {
-      scheduledExercisesCount: scheduledExercises.length,
-      scheduledLoading,
-      scheduledError,
-      scheduledInitialized
-    });
-    
-    console.debug('[HistoryPage] Fetching all scheduled exercises on mount');
-    fetchAllScheduled().catch(console.error);
-  }, []); // Empty dependency array - runs only once on mount
+  // Wrap the function to match expected signature
+  const markExerciseCompleted = useCallback(async (id: string): Promise<void> => {
+    await _markExerciseCompleted(id);
+  }, [_markExerciseCompleted]);
 
   // Enrich scheduled exercises with exercise and category names using memoization
   const enrichedScheduledExercises = useMemo((): EnrichedScheduledExercise[] => {
     console.debug('[HistoryPage] Enriching scheduled exercises:', {
       scheduledExercisesCount: scheduledExercises.length,
-      exercisesCount: exercises.length,
-      categoriesCount: categories.length
+      exercisesCount: exercises?.length || 0,
+      categoriesCount: categories?.length || 0
     });
     
     return scheduledExercises.map(scheduled => {
-      const exercise = getExerciseById(scheduled.exerciseId);
-      const category = getCategoryById(scheduled.categoryId);
+      const exercise = exerciseUtils.getExerciseById(exercises || [], scheduled.exerciseId);
+      const category = exerciseUtils.getCategoryById(categories || [], scheduled.categoryId);
       
       return {
         ...scheduled,
@@ -61,18 +53,20 @@ export default function HistoryPage() {  // Store state
         categoryColor: category?.color || '#6b7280',
       };
     });
-  }, [scheduledExercises, getExerciseById, getCategoryById]);
+  }, [scheduledExercises, exercises, categories]);
+
   // Create columns with store methods
   const columns = useMemo(() => createColumns({ 
     markExerciseCompleted 
   }), [markExerciseCompleted]);
 
   // Prepare categories for DataTable filtering
-  const categoryOptions = categories.map(cat => ({
-    label: cat.name,
-    value: cat.name,
-    color: cat.color
-  }));
+  const categoryOptions = useMemo(() => 
+    (categories || []).map(cat => ({
+      label: cat.name,
+      value: cat.name,
+      color: cat.color
+    })), [categories]);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -89,9 +83,6 @@ export default function HistoryPage() {  // Store state
     };
   }, [enrichedScheduledExercises]);
 
-  // Derived state for loading and error handling
-  const isLoading = scheduledLoading || exerciseLoading;
-  const error = scheduledError || exerciseError;
 
   if (isLoading) {
     return (

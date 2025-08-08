@@ -2,293 +2,189 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { userExercisePreferenceService } from '@/lib/services/clients-service/user-exercise-preference-service';
 
-// Store-specific types for frontend compatibility
-interface StoreUserExercisePreference {
-  id: string;
-  userId: string;
-  exerciseId: string;
-  status: 'favorite';
-  notes?: string;
-  customSettings?: {
-    sets?: number;
-    reps?: number;
-    weight?: number;
-    restTime?: number;
-    duration?: number;
-  };
-  addedAt: string;
-  lastUsed?: string;
-  // Populated exercise data
-  exercise?: {
-    id: string;
-    name: string;
-    description?: string;
-    imageUrl?: string;
-    difficulty?: 'beginner' | 'intermediate' | 'advanced';
-    muscleGroups?: string[];
-    equipment?: string[];
-  };
-}
-
-// User Exercise Preference store state interface
+// Pure UI state interface - only dialog and filter states
 interface UserExercisePreferenceStoreState {
-  // Data
-  preferences: StoreUserExercisePreference[];
+  // Dialog states
+  isPreferenceDialogOpen: boolean;
+  selectedExerciseId: string | null;
   
-  // UI state
-  isLoading: boolean;
-  error: string | null;
+  // Filter/view states
+  viewMode: 'favorites' | 'recent' | 'all';
+  sortBy: 'name' | 'dateAdded' | 'lastUsed';
+  sortDirection: 'asc' | 'desc';
   
-  // Initialization state
-  initialized: boolean;
-
-  // Methods
-  clearErrors: () => void;
-  clearCache: () => void;
-
-  // Data fetching methods
-  initializeStore: () => Promise<void>;
-  refreshPreferences: () => Promise<void>;
-  forceRefresh: () => Promise<void>;
-    // Preference management methods
-  addPreference: (exerciseId: string, status: 'favorite', notes?: string, customSettings?: any) => Promise<void>;
-  updatePreference: (exerciseId: string, updates: Partial<Omit<StoreUserExercisePreference, 'id' | 'userId' | 'exerciseId' | 'addedAt'>>) => Promise<void>;
-  removePreference: (exerciseId: string) => Promise<void>;
-  markAsUsed: (exerciseId: string) => Promise<void>;
+  // Search/filter
+  searchQuery: string;
+  filterByMuscleGroup: string | null;
+  showOnlyRecent: boolean;
   
-  // Status-specific methods
-  toggleFavorite: (exerciseId: string) => Promise<void>;
+  // UI actions
+  openPreferenceDialog: (exerciseId: string) => void;
+  closePreferenceDialog: () => void;
+  setViewMode: (mode: 'favorites' | 'recent' | 'all') => void;
+  setSortBy: (sort: 'name' | 'dateAdded' | 'lastUsed') => void;
+  setSortDirection: (direction: 'asc' | 'desc') => void;
+  setSearchQuery: (query: string) => void;
+  setFilterByMuscleGroup: (group: string | null) => void;
+  setShowOnlyRecent: (show: boolean) => void;
   
-  // Filtering methods
-  getPreferencesByStatus: (status: 'favorite') => StoreUserExercisePreference[];
-  getFavoriteExercises: () => StoreUserExercisePreference[];
-  
-  // Utility methods
-  getPreferenceByExerciseId: (exerciseId: string) => StoreUserExercisePreference | undefined;
-  hasPreference: (exerciseId: string) => boolean;
-  getExerciseStatus: (exerciseId: string) => 'favorite' | null;
+  // Reset UI state
+  resetFilters: () => void;
+  resetUI: () => void;
 }
 
-// Helper function to convert API response to store format
-const convertToStoreFormat = (apiPreference: any): StoreUserExercisePreference => ({
-  id: apiPreference._id || apiPreference.id,
-  userId: apiPreference.userId,
-  exerciseId: apiPreference.exerciseId._id || apiPreference.exerciseId,
-  status: apiPreference.status,
-  notes: apiPreference.notes,
-  customSettings: apiPreference.customSettings,
-  addedAt: apiPreference.addedAt,
-  lastUsed: apiPreference.lastUsed,
-  exercise: apiPreference.exerciseId && typeof apiPreference.exerciseId === 'object' ? {
-    id: apiPreference.exerciseId._id || apiPreference.exerciseId.id,
-    name: apiPreference.exerciseId.name,
-    description: apiPreference.exerciseId.description,
-    imageUrl: apiPreference.exerciseId.imageUrl,
-    difficulty: apiPreference.exerciseId.difficulty,
-    muscleGroups: apiPreference.exerciseId.muscleGroups,
-    equipment: apiPreference.exerciseId.equipment,
-  } : undefined,
-});
-
-// Create the store
+// Create the pure UI state store
 export const useUserExercisePreferenceStore = create<UserExercisePreferenceStoreState>()(
   persist(
     (set, get) => ({
-      // Initial state
-      preferences: [],
-      isLoading: false,
-      error: null,
-      initialized: false,
-
-      // Clear errors
-      clearErrors: () => set({ error: null }),
-
-      // Clear localStorage cache and reset state
-      clearCache: () => {
+      // Dialog states
+      isPreferenceDialogOpen: false,
+      selectedExerciseId: null,
+      
+      // Filter/view states  
+      viewMode: 'all',
+      sortBy: 'name',
+      sortDirection: 'asc',
+      
+      // Search/filter
+      searchQuery: '',
+      filterByMuscleGroup: null,
+      showOnlyRecent: false,
+      
+      // UI actions
+      openPreferenceDialog: (exerciseId: string) => {
         set({ 
-          preferences: [], 
-          initialized: false, 
-          isLoading: false, 
-          error: null 
+          isPreferenceDialogOpen: true, 
+          selectedExerciseId: exerciseId 
         });
-        // Clear localStorage for this store
-        localStorage.removeItem('user-exercise-preference-store');
       },
-
-      // Initialize store - always fetch fresh data from server
-      initializeStore: async () => {
-        const state = get();
-        
-        // Skip if already loading to prevent duplicate requests
-        if (state.isLoading) {
-          return;
-        }
-
-        set({ isLoading: true, error: null });
-        
-        try {
-          await get().refreshPreferences();
-          set({ initialized: true });
-        } catch (error: any) {
-          console.error('Failed to initialize user exercise preference store:', error);
-          set({ error: error.message || 'Failed to initialize preferences' });
-        } finally {
-          set({ isLoading: false });
-        }
+      
+      closePreferenceDialog: () => {
+        set({ 
+          isPreferenceDialogOpen: false, 
+          selectedExerciseId: null 
+        });
       },
-
-      // Refresh preferences from API
-      refreshPreferences: async () => {
-        set({ isLoading: true, error: null });
-        
-        try {
-          const apiPreferences = await userExercisePreferenceService.getAll();
-          const storePreferences = apiPreferences.map(convertToStoreFormat);
-          set({ preferences: storePreferences });
-        } catch (error: any) {
-          console.error('Failed to refresh preferences:', error);
-          set({ error: error.message || 'Failed to refresh preferences' });
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
+      
+      setViewMode: (mode: 'favorites' | 'recent' | 'all') => {
+        set({ viewMode: mode });
       },
-
-      // Force refresh - bypasses initialization check and always fetches fresh data
-      forceRefresh: async () => {
-        set({ initialized: false });
-        await get().initializeStore();
-      },      // Add new preference
-      addPreference: async (exerciseId: string, status: 'favorite', notes?: string, customSettings?: any) => {
-        set({ isLoading: true, error: null });
-        
-        try {
-          const apiPreference = await userExercisePreferenceService.create({
-            exerciseId,
-            status,
-            notes,
-            customSettings
-          });
-          const storePreference = convertToStoreFormat(apiPreference);
-          
-          set(state => ({
-            preferences: [...state.preferences, storePreference]
-          }));
-        } catch (error: any) {
-          console.error('Failed to add preference:', error);
-          set({ error: error.message || 'Failed to add preference' });
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
+      
+      setSortBy: (sort: 'name' | 'dateAdded' | 'lastUsed') => {
+        set({ sortBy: sort });
       },
-
-      // Update existing preference
-      updatePreference: async (exerciseId: string, updates: Partial<Omit<StoreUserExercisePreference, 'id' | 'userId' | 'exerciseId' | 'addedAt'>>) => {
-        set({ isLoading: true, error: null });
-        
-        try {
-          const apiPreference = await userExercisePreferenceService.update(exerciseId, updates);
-          const storePreference = convertToStoreFormat(apiPreference);
-          
-          set(state => ({
-            preferences: state.preferences.map(pref => 
-              pref.exerciseId === exerciseId ? storePreference : pref
-            )
-          }));
-        } catch (error: any) {
-          console.error('Failed to update preference:', error);
-          set({ error: error.message || 'Failed to update preference' });
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
+      
+      setSortDirection: (direction: 'asc' | 'desc') => {
+        set({ sortDirection: direction });
       },
-
-      // Remove preference
-      removePreference: async (exerciseId: string) => {
-        set({ isLoading: true, error: null });
-        
-        try {
-          await userExercisePreferenceService.delete(exerciseId);
-          
-          set(state => ({
-            preferences: state.preferences.filter(pref => pref.exerciseId !== exerciseId)
-          }));
-        } catch (error: any) {
-          console.error('Failed to remove preference:', error);
-          set({ error: error.message || 'Failed to remove preference' });
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
+      
+      setSearchQuery: (query: string) => {
+        set({ searchQuery: query });
       },
-
-      // Mark as used
-      markAsUsed: async (exerciseId: string) => {
-        try {
-          await userExercisePreferenceService.markAsUsed(exerciseId);
-          
-          // Update local state with current timestamp
-          set(state => ({
-            preferences: state.preferences.map(pref => 
-              pref.exerciseId === exerciseId 
-                ? { ...pref, lastUsed: new Date().toISOString() }
-                : pref
-            )
-          }));
-        } catch (error: any) {
-          console.error('Failed to mark as used:', error);
-          set({ error: error.message || 'Failed to mark as used' });
-          throw error;
-        }
-      },      // Status-specific methods
-      toggleFavorite: async (exerciseId: string) => {
-        const preference = get().getPreferenceByExerciseId(exerciseId);
-        
-        if (!preference) {
-          // Add as favorite if doesn't exist
-          await get().addPreference(exerciseId, 'favorite');
-        } else if (preference.status === 'favorite') {
-          // Remove if currently favorite
-          await get().removePreference(exerciseId);
-        } else {
-          // Update to favorite if exists with different status
-          await get().updatePreference(exerciseId, { status: 'favorite' });
-        }
+      
+      setFilterByMuscleGroup: (group: string | null) => {
+        set({ filterByMuscleGroup: group });
       },
-
-      // Filtering methods
-      getPreferencesByStatus: (status: 'favorite') => {
-        return get().preferences.filter(pref => pref.status === status);
+      
+      setShowOnlyRecent: (show: boolean) => {
+        set({ showOnlyRecent: show });
       },
-
-      getFavoriteExercises: () => get().getPreferencesByStatus('favorite'),
-
-      // Utility methods
-      getPreferenceByExerciseId: (exerciseId: string) => {
-        return get().preferences.find(pref => pref.exerciseId === exerciseId);
+      
+      // Reset functions
+      resetFilters: () => {
+        set({
+          searchQuery: '',
+          filterByMuscleGroup: null,
+          showOnlyRecent: false,
+          viewMode: 'all',
+          sortBy: 'name',
+          sortDirection: 'asc',
+        });
       },
-
-      hasPreference: (exerciseId: string) => {
-        return get().preferences.some(pref => pref.exerciseId === exerciseId);
-      },
-
-      getExerciseStatus: (exerciseId: string) => {
-        const preference = get().getPreferenceByExerciseId(exerciseId);
-        return preference ? preference.status : null;
+      
+      resetUI: () => {
+        set({
+          isPreferenceDialogOpen: false,
+          selectedExerciseId: null,
+          searchQuery: '',
+          filterByMuscleGroup: null,
+          showOnlyRecent: false,
+          viewMode: 'all',
+          sortBy: 'name',
+          sortDirection: 'asc',
+        });
       },
     }),
     {
       name: 'user-exercise-preference-store',
       partialize: (state) => ({
-        preferences: state.preferences,
-        // Don't persist initialized flag - always fetch fresh data on app load
+        // Persist UI preferences but not dialog state
+        viewMode: state.viewMode,
+        sortBy: state.sortBy,
+        sortDirection: state.sortDirection,
+        filterByMuscleGroup: state.filterByMuscleGroup,
+        showOnlyRecent: state.showOnlyRecent,
+        // Don't persist: dialog state, search query, selected exercise
       }),
     }
   )
 );
+
+// Backwards compatibility layer for gradual migration
+// Components can use these while being migrated to the new data hook pattern
+import { 
+  useUserExercisePreferenceData,
+  useUserExercisePreferenceMutations 
+} from '@/lib/hooks/data-hook/use-user-exercise-preference-data';
+
+// /**
+//  * @deprecated Use useUserExercisePreferenceData() instead
+//  * Legacy wrapper for backwards compatibility during migration
+//  */
+// export function useLegacyUserExercisePreferenceStore() {
+//   const store = useUserExercisePreferenceStore();
+//   const data = useUserExercisePreferenceData();
+//   const mutations = useUserExercisePreferenceMutations();
+  
+//   return {
+//     // UI state (from store)
+//     ...store,
+    
+//     // Data state (from React Query via data hook)
+//     preferences: data.preferences,
+//     isLoading: data.isLoading,
+//     error: data.error,
+//     initialized: !data.isLoading, // Backwards compatibility
+    
+//     // Data methods (delegated to React Query mutations)
+//     clearErrors: () => {}, // No-op - React Query handles error state
+//     clearCache: data.refetch,
+//     initializeStore: data.refetch,
+//     refreshPreferences: data.refetch,
+//     forceRefresh: data.refetch,
+    
+//     // CRUD operations (delegated to mutations)
+//     addPreference: async (exerciseId: string, status: 'favorite', notes?: string, customSettings?: any) => {
+//       await mutations.createPreference({ exerciseId, status, notes, customSettings });
+//     },
+//     updatePreference: async (exerciseId: string, updates: any) => {
+//       await mutations.updatePreference(exerciseId, updates);
+//     },
+//     removePreference: mutations.deletePreference,
+//     markAsUsed: mutations.markAsUsed,
+//     toggleFavorite: async (exerciseId: string) => {
+//       const currentStatus = data.selectors.getExerciseStatus(exerciseId);
+//       await mutations.toggleFavorite(exerciseId, currentStatus);
+//     },
+    
+//     // Selector methods (delegated to data selectors)
+//     getPreferencesByStatus: data.selectors.byStatus,
+//     getFavoriteExercises: () => data.selectors.favoriteExercises,
+//     getPreferenceByExerciseId: data.selectors.findByExerciseId,
+//     hasPreference: data.selectors.hasPreference,
+//     getExerciseStatus: data.selectors.getExerciseStatus,
+//   };
+// }
 
 export default useUserExercisePreferenceStore;

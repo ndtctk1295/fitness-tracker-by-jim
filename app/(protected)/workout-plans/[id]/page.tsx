@@ -25,8 +25,8 @@ import { WeeklyScheduleGrid } from '@/components/workout-plans/weekly-schedule-g
 import { PlanStatistics } from '@/components/workout-plans/plan-statistics';
 import { ProgressionGraph } from '@/components/workout-plans/progression-graph';
 import { PlanControls } from '@/components/workout-plans/plan-controls';
-import { useWorkoutPlanStore } from '@/lib/stores/workout-plan-store';
-import { useWorkoutPlanById } from '@/lib/queries';
+import { useWorkoutPlanData } from '@/lib/hooks/data-hook/use-workout-plan-data';
+import { useWorkoutPlanById } from '@/lib/utils/queries/workout-plans-queries';
 import { useApiToast } from '@/lib/hooks/use-api-toast';
 import { format } from 'date-fns';
 
@@ -50,7 +50,7 @@ export default function WorkoutPlanDetailPage() {
     duplicatePlan,
     isLoading: storeLoading,
     error 
-  } = useWorkoutPlanStore();
+  } = useWorkoutPlanData();
   
   const { showSuccessToast, showErrorToast } = useApiToast();
 
@@ -77,11 +77,17 @@ export default function WorkoutPlanDetailPage() {
   };
 
   const handleDuplicate = async () => {
+    if (!plan) return;
     try {
-      const result = await duplicatePlan(planId);
-      showSuccessToast('Workout plan duplicated successfully!');
-      // Navigate to the new plan - we'll need to get the ID from the result
-      router.push('/workout-plans');
+      const result = await duplicatePlan({ 
+        id: planId,
+        newName: `${plan.name} (Copy)`
+      });
+      if (result) {
+        showSuccessToast('Workout plan duplicated successfully!');
+        // Navigate back to the plans list to see the new plan
+        router.push('/workout-plans');
+      }
     } catch (error) {
       showErrorToast('Failed to duplicate workout plan', 'Please try again');
     }

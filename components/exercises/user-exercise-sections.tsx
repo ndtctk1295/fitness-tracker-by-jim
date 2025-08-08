@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { useUserExercisePreferenceStore } from '@/lib/stores/user-exercise-preference-store'
-import { useExerciseStore } from '@/lib/stores/exercise-store'
+import { useUserExercisePreferenceData } from '@/lib/hooks/data-hook/use-user-exercise-preference-data'
+import { useExerciseData } from '@/lib/hooks/data-hook/use-exercise-data'
 import { ExerciseCard } from './exercise-card'
 
 // Store-specific types for frontend compatibility
@@ -47,14 +47,14 @@ export function UserExerciseSections({ onExerciseClick }: UserExerciseSectionsPr
     preferences, 
     isLoading: preferencesLoading,
     error: preferencesError,
-    getFavoriteExercises,
-    forceRefresh
-  } = useUserExercisePreferenceStore()
+    selectors,
+    refetch: forceRefresh
+  } = useUserExercisePreferenceData()
   
   const { 
     exercises, 
     isLoading: exercisesLoading
-  } = useExerciseStore()
+  } = useExerciseData()
 
   // Mock categories for now
   const categories = [
@@ -69,7 +69,7 @@ export function UserExerciseSections({ onExerciseClick }: UserExerciseSectionsPr
 
   const isLoading = preferencesLoading || exercisesLoading
   // Get exercises by status
-  const favoriteExercises = getFavoriteExercises()
+  const favoriteExercises = selectors.favoriteExercises
   const recentlyUsed = preferences
     .filter(p => p.lastUsed)
     .sort((a, b) => new Date(b.lastUsed!).getTime() - new Date(a.lastUsed!).getTime())

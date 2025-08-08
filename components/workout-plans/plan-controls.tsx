@@ -17,11 +17,11 @@ import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmatio
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { WorkoutPlan } from "@/lib/services/clients-service/workout-plan-service";
-import { useWorkoutPlanStore } from "@/lib/stores/workout-plan-store";
+import { useWorkoutPlanData } from '@/lib/hooks/data-hook/use-workout-plan-data';
 import { useApiToast } from "@/lib/hooks/use-api-toast";
 
-// Use Store type for component props
-type StoreWorkoutPlan = {
+// Use the same type that the data hook returns
+type WorkoutPlanFromDataHook = {
   id?: string;
   userId: string;
   name: string;
@@ -30,23 +30,23 @@ type StoreWorkoutPlan = {
   duration?: number;
   isActive: boolean;
   mode: 'ongoing' | 'dated';
-  startDate?: string;
-  endDate?: string;
+  startDate?: Date;
+  endDate?: Date;
   weeklyTemplate: any[];
   createdBy?: string;
   updatedBy?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 interface PlanControlsProps {
-  workoutPlan: StoreWorkoutPlan;
-  onPlanUpdated: (plan: StoreWorkoutPlan) => void;
+  workoutPlan: WorkoutPlanFromDataHook;
+  onPlanUpdated: (plan: WorkoutPlanFromDataHook) => void;
   onPlanDeleted: () => void;
 }
 
 export function PlanControls({ workoutPlan, onPlanUpdated, onPlanDeleted }: PlanControlsProps) {
-  const { updatePlan, deletePlan, duplicatePlan } = useWorkoutPlanStore();
+  const { updatePlan, deletePlan, duplicatePlan } = useWorkoutPlanData();
   const { showSuccessToast, showErrorToast } = useApiToast();
   
   const [isEditingBasic, setIsEditingBasic] = useState(false);
@@ -98,9 +98,14 @@ export function PlanControls({ workoutPlan, onPlanUpdated, onPlanDeleted }: Plan
     setIsDuplicating(true);
     try {
       if (!workoutPlan.id) return;
-      const duplicatedPlan = await duplicatePlan(workoutPlan.id);
-      showSuccessToast('Plan duplicated - A copy of your plan has been created');
-      // Optionally navigate to the new plan
+      const duplicatedPlan = await duplicatePlan({ 
+        id: workoutPlan.id,
+        newName: `${workoutPlan.name} (Copy)`
+      });
+      if (duplicatedPlan) {
+        showSuccessToast('Plan duplicated - A copy of your plan has been created');
+        // Optionally navigate to the new plan or refresh the list
+      }
     } catch (error) {
       showErrorToast('Failed to duplicate plan', 'Please try again');
     } finally {

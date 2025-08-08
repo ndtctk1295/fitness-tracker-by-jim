@@ -5,7 +5,6 @@ import { scheduledExerciseService } from "./scheduled-exercise-service";
 import { timerStrategyService } from "./timer-strategy-service";
 import { weightPlateService } from "./weight-plate-service";
 import { userClientService } from "./user-client-service";
-import { exerciseOrderService } from "./exercise-order-service";
 
 export {
   categoryService,
@@ -15,5 +14,4 @@ export {
   timerStrategyService,
   weightPlateService,
   userClientService,
-  exerciseOrderService
 };

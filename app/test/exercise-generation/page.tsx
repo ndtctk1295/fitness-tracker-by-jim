@@ -8,8 +8,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, CheckCircle, AlertCircle, RefreshCw, Calendar, Settings } from 'lucide-react';
-import { useScheduledExerciseStoreWithGeneration } from '@/lib/stores/scheduled-exercise-store';
-import { useWorkoutPlanStore } from '@/lib/stores/workout-plan-store';
+import { useScheduledExerciseData } from '@/lib/hooks/data-hook/use-scheduled-exercise-data';
+import { useWorkoutPlanData } from '@/lib/hooks/data-hook/use-workout-plan-data';
 import { format, addDays } from 'date-fns';
 
 interface TestResult {
@@ -27,13 +27,22 @@ export default function ExerciseGenerationTestPage() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   const {
-    scheduledExercises,
+    exercises: scheduledExercises,
     isLoading: scheduledLoading,
     error: scheduledError,
-    ensureExercisesGeneratedIfNeeded,
-    fetchExercisesForDateRange,
-    initialized: scheduledInitialized,
-  } = useScheduledExerciseStoreWithGeneration();
+  } = useScheduledExerciseData();
+
+  // Note: Exercise generation methods moved to server-side React Query patterns
+  // These functions are disabled in this test page  
+  const ensureExercisesGeneratedIfNeeded = async () => {
+    console.log('Exercise generation moved to React Query patterns');
+  };
+  
+  const fetchExercisesForDateRange = async (startDate: string, endDate: string) => {
+    console.log('Exercise fetching now handled by React Query automatically');
+  };
+
+  const scheduledInitialized = !scheduledLoading;
 
   const {
     activePlan,
@@ -41,7 +50,7 @@ export default function ExerciseGenerationTestPage() {
     error: workoutError,
     loadActivePlan,
     initialized: workoutInitialized,
-  } = useWorkoutPlanStore();
+  } = useWorkoutPlanData();
 
   // Initialize stores
   useEffect(() => {

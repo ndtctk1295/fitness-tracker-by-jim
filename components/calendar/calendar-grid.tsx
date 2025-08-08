@@ -5,7 +5,7 @@ import { DraggableExerciseBlock } from "./draggable-exercise-block";
 import { format, isSameDay, isSameMonth, isBefore, startOfDay } from "date-fns";
 import { isToday } from "@/lib/utils/calendar/date-utils";
 import { categorizeExercises, getMaxExercisesToShow, getWorkoutPlanTemplateExercises, hasValidWorkoutPlanId } from "@/lib/utils/calendar/exercise-utils";
-import { useCalendarStore, useCalendarData } from "@/lib/stores/calendar-store";
+import { useCalendarStore } from "@/lib/stores/calendar-store";
 import { useEffect } from "react";
 
 interface CalendarGridProps {
@@ -35,11 +35,12 @@ export function CalendarGrid({
   const { 
     currentDate,
     calendarView,
-    calendarDisplayMode
+    calendarDisplayMode,
+    getCalendarDays
   } = useCalendarStore();
   
-  // Get pre-calculated data
-  const { days } = useCalendarData();
+  // Get calendar days directly
+  const days = getCalendarDays();
   
   // Calculate max exercises to display
   const maxExercisesToShow = getMaxExercisesToShow(calendarDisplayMode, calendarView as 'month' | 'week');

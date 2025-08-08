@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useUserExercisePreferenceStore } from '@/lib/stores/user-exercise-preference-store';
+import { useUserExercisePreferenceData } from '@/lib/hooks/data-hook/use-user-exercise-preference-data';
 import { cn } from '@/lib/utils';
 
 interface ExerciseCardProps {
@@ -52,17 +52,18 @@ export function ExerciseCard({
   compact = false 
 }: ExerciseCardProps) {  const [isLoading, setIsLoading] = useState(false);
   const {
+    selectors,
     toggleFavorite,
-    getPreferenceByExerciseId,
-  } = useUserExercisePreferenceStore();
+  } = useUserExercisePreferenceData();
 
-  const userPreference = getPreferenceByExerciseId(exercise.id);
-  const isFavorite = userPreference?.status === 'favorite';
+  const userPreference = selectors.findByExerciseId(exercise.id);
+  const isFavorite = selectors.isFavorite(exercise.id);
 
   const handleToggleFavorite = async () => {
     setIsLoading(true);
     try {
-      await toggleFavorite(exercise.id);
+      const currentStatus = selectors.getExerciseStatus(exercise.id);
+      await toggleFavorite(exercise.id, currentStatus);
     } catch (error) {
       console.error('Failed to update exercise favorite status:', error);
     } finally {

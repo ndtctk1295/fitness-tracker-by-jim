@@ -1,31 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useExerciseStore } from '@/lib/stores/exercise-store'
-import { useUserExercisePreferenceStore } from '@/lib/stores/user-exercise-preference-store'
+import { useExerciseFiltersStore } from '@/lib/stores/exercise-store'
+import { useUserExercisePreferenceData } from '@/lib/hooks/data-hook/use-user-exercise-preference-data'
 import { UserExerciseSections } from '@/components/exercises/user-exercise-sections'
 import { AllExercisesTab } from '@/components/exercises/all-exercises-tab'
+import { useExerciseData } from '@/lib/hooks/data-hook/use-exercise-data'
 
 export default function ExercisesPage() {
-  const { 
-    categories,
+    const { 
     exercises, 
-    isLoading: exercisesLoading, 
-    error: exercisesError
-  } = useExerciseStore()
+    categories, 
+    isLoading, 
+    filters, 
+    error,
+    setFilters 
+  } = useExerciseData();
   
   const { 
     preferences, 
     isLoading: preferencesLoading
-  } = useUserExercisePreferenceStore()
+  } = useUserExercisePreferenceData()
 
   const [activeMainTab, setActiveMainTab] = useState('all-exercises')
-
-  // Remove the useEffect that was causing the infinite loop
-  // TanStack Query will automatically fetch data when components mount
-
-  const isLoading = exercisesLoading || preferencesLoading
 
   return (
     <div className="py-10">      
@@ -44,11 +42,11 @@ export default function ExercisesPage() {
         
         <TabsContent value="all-exercises" className="space-y-0">
           <AllExercisesTab
-            exercises={exercises}
-            categories={categories}
+            exercises={exercises || []}
+            categories={categories || []}
             preferences={preferences}
             isLoading={isLoading}
-            exercisesError={exercisesError}
+            exercisesError={error || null}
           />
         </TabsContent>
         

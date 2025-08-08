@@ -4,6 +4,8 @@ import { Exercise } from '@/lib/types';
 // Re-export types for external consumption
 export type { Exercise } from '@/lib/types';
 
+/*DEPRECATED, ONLY APPLY FOR OLD ADMIN PAGE */
+
 export const exerciseService = {
   /**
    * Get all exercises

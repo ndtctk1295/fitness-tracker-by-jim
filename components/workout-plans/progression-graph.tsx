@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { format, subDays, eachDayOfInterval, isSameDay } from "date-fns";
 import { WorkoutPlan } from "@/lib/services/clients-service/workout-plan-service";
-import { useScheduledExercises } from "@/lib/queries";
-import { useExerciseStore } from "@/lib/stores/exercise-store";
+import { useScheduledExercises } from "@/lib/utils/queries/scheduled-exercises-queries";
+import { useScheduledExerciseData } from "@/lib/hooks/data-hook/use-scheduled-exercise-data";
+import { useExerciseData } from "@/lib/hooks/data-hook/use-exercise-data";
 
 interface ProgressionGraphProps {
   workoutPlan: WorkoutPlan;
@@ -37,7 +38,7 @@ interface ExerciseProgress {
 export function ProgressionGraph({ workoutPlan }: ProgressionGraphProps) {
   const { data: scheduledExercisesData } = useScheduledExercises();
   const scheduledExercises = scheduledExercisesData || [];
-  const { exercises } = useExerciseStore();
+  const { exercises } = useExerciseData();
   const [timeframe, setTimeframe] = useState<'week' | 'month' | '3months'>('month');
   const [view, setView] = useState<'completion' | 'exercises'>('completion');
   const [progressData, setProgressData] = useState<ProgressData[]>([]);

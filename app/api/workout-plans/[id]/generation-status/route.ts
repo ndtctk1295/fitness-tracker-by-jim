@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { checkGenerationStatus } from '@/lib/services/clients-service/exercise-generation-service';
+import { checkGenerationStatus } from '@/lib/services/server-service/exercise-generation-service';
 
 /**
  * API endpoint to check generation status for a specific workout plan

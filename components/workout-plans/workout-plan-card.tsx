@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { DeleteConfirmationDialog } from '@/components/shared/delete-confirmation-dialog';
 import { PlanActivationConfirmDialog } from '@/components/workout-plans/plan-activation-confirm-dialog';
-import { useWorkoutPlanStore } from '@/lib/stores/workout-plan-store';
+import { useWorkoutPlanData } from '@/lib/hooks/data-hook/use-workout-plan-data';
 import { useApiToast } from '@/lib/hooks/use-api-toast';
 import { format } from 'date-fns';
 
@@ -46,7 +46,7 @@ export function WorkoutPlanCard({
   const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [activationConfirmOpen, setActivationConfirmOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);  const { 
+  const [isLoading, setIsLoading] = useState(false);  const {
     activatePlan,
     deactivatePlan,
     deletePlan,
@@ -55,7 +55,7 @@ export function WorkoutPlanCard({
     loadActivePlan,
     activePlan,
     workoutPlans
-  } = useWorkoutPlanStore();
+  } = useWorkoutPlanData();
   
   const { showSuccessToast, showErrorToast } = useApiToast();
 
@@ -115,7 +115,10 @@ export function WorkoutPlanCard({
     e.stopPropagation();
     setIsLoading(true);
     try {      
-      await duplicatePlan(plan.id);
+      await duplicatePlan({ 
+        id: plan.id,
+        newName: `${plan.name} (Copy)`
+      });
       showSuccessToast('Workout plan duplicated successfully!');
       await loadAllPlans();
     } catch (error) {

@@ -1,13 +1,17 @@
 import { renderHook, act } from '@testing-library/react'
 
 // Mock the queries module completely BEFORE any imports
-jest.mock('@/lib/queries', () => ({
+jest.mock('@/lib/utils/queries/exercises-queries', () => ({
   useExercises: jest.fn(),
+}))
+
+jest.mock('@/lib/utils/queries/categories-queries', () => ({
   useCategories: jest.fn(),
 }))
 
 // Import after mocking  
-import { useExercises, useCategories } from '@/lib/queries'
+import { useExercises } from '@/lib/utils/queries/exercises-queries';
+import { useCategories } from '@/lib/utils/queries/categories-queries';
 import { useExerciseStore } from '@/lib/stores/exercise-store'
 import type { StoreCategory, StoreExercise } from '@/lib/types'
 

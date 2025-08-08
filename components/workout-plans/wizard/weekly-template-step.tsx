@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useExerciseStore } from "@/lib/stores/exercise-store";
+import { useExerciseData } from "@/lib/hooks/data-hook/use-exercise-data";
 import { Exercise, StoreExercise } from "@/lib/types";
 
 interface WeeklyTemplateStepProps {
@@ -49,7 +49,7 @@ interface ExerciseSelectorProps {
 }
 
 function ExerciseSelector({ onSelect, onClose }: ExerciseSelectorProps) {
-  const { exercises } = useExerciseStore();
+  const { exercises } = useExerciseData();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("all");
   const filteredExercises = exercises.filter(exercise => {
@@ -263,7 +263,7 @@ function ScheduledExerciseCard({ exercise, scheduledExercise, onUpdate, onRemove
 }
 
 export function WeeklyTemplateStep({ data, onDataChange }: WeeklyTemplateStepProps) {
-  const { exercises } = useExerciseStore();
+  const { exercises } = useExerciseData();
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
 

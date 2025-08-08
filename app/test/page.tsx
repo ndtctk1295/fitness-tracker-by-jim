@@ -10,43 +10,51 @@ import { navigateTo as navigationUtil } from '@/lib/utils/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TimerSummary } from '@/components/timer-summary';
-import { useExerciseStore } from '@/lib/stores/exercise-store';
-import { useScheduledExerciseStore } from '@/lib/stores/scheduled-exercise-store';
+import { useExerciseData } from '@/lib/hooks/data-hook/use-exercise-data';
+import { useScheduledExerciseData } from '@/lib/hooks/data-hook/use-scheduled-exercise-data';
+import { useScheduledExercises } from '@/lib/utils/queries/scheduled-exercises-queries';
 import { useTimerStore } from '@/lib/stores/timer-store';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
   const router = useRouter();
-    // Get store data
-  const { exercises, categories } = useExerciseStore();
-  const { scheduledExercises } = useScheduledExerciseStore();
+  // Get store data using the new pattern with enhanced selectors
+  const { exercises, categories } = useExerciseData();
+  const { exercises: scheduledExercises, selectors } = useScheduledExerciseData();
+  
+  // Get all scheduled exercises for statistics (using React Query directly)
+  const { data: allScheduledExercises } = useScheduledExercises();
+  
   const { timerStrategies, activeTimer } = useTimerStore();
   
   // Current date and week
   const today = new Date();
   const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 }); // Monday as start of week
-    // Get scheduled exercises for today
-  const todaysExercises = scheduledExercises.filter(
-    (exercise: any) => exercise.date === format(today, 'yyyy-MM-dd')
-  );
-    // Calculate statistics
+  
+  // Use optimized selectors instead of manual filtering
+  const todaysScheduledExercises = selectors.today;
+  
+  // Today's exercises are already filtered by the selector
+  const todaysExercises = todaysScheduledExercises;
+  
+  // Use enhanced stats from selectors
   const totalExercises = exercises.length;
-  const completedWorkouts = [...new Set(scheduledExercises.map((ex: any) => ex.date))].length;
+  const completedWorkouts = [...new Set((allScheduledExercises || []).map((ex: any) => ex.date))].length;
   const totalCategories = categories.length;
+  const todayStats = selectors.stats.todayStats;
+  const weekStats = selectors.stats.weekStats;
   
   // Navigation handler using the utility but with the same name to minimize changes
   const navigateTo = (path: string) => {
     navigationUtil(router, path);
   };
   
-  // Create week day headers
+  // Create week day headers with optimized data access
   const weekDays = Array.from({ length: 7 }).map((_, index) => {
     const date = addDays(currentWeekStart, index);
     const isToday = isSameDay(date, today);
-      const exercisesForDay = scheduledExercises.filter(
-      (exercise: any) => exercise.date === format(date, 'yyyy-MM-dd')
-    );
+    const exercisesForDay = selectors.byDate(date);
     
     return {
       date,
@@ -54,6 +62,8 @@ export default function DashboardPage() {
       dayOfMonth: format(date, 'd'),
       isToday,
       hasExercises: exercisesForDay.length > 0,
+      exerciseCount: exercisesForDay.length,
+      completedCount: exercisesForDay.filter(ex => ex.completed).length,
     };
   });
   
@@ -145,9 +155,9 @@ export default function DashboardPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{todaysExercises.length}</div>
+            <div className="text-2xl font-bold">{todayStats.total}</div>
             <p className="text-xs text-muted-foreground">
-              exercises scheduled for today
+              {todayStats.completed} completed, {todayStats.pending} pending ({todayStats.completionRate.toFixed(0)}%)
             </p>
           </CardContent>
         </Card>

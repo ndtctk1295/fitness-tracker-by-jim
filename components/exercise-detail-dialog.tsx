@@ -17,15 +17,15 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ExerciseCompletionToggle } from "@/components/ui/exercise-completion-toggle"
 import { DeleteConfirmationDialog } from "@/components/shared/delete-confirmation-dialog"
-import { useExerciseStore } from "@/lib/stores/exercise-store"
-import { useScheduledExerciseStore } from "@/lib/stores/scheduled-exercise-store"
+
 import { useWeightStore } from "@/lib/stores/weight-store"
-import { useUserExercisePreferenceStore } from "@/lib/stores/user-exercise-preference-store"
+import { useUserExercisePreferenceData } from "@/lib/hooks/data-hook/use-user-exercise-preference-data"
 import { kgToLbs } from "@/lib/utils/weight-conversion"
 import { WeightPlateSelector } from "@/components/weight-plate-selector"
 import { useToast } from "@/lib/hooks/use-toast"
 import { useExerciseDialogStore } from "@/lib/stores/exercise-dialog-store"
-
+import { useExerciseData } from "@/lib/hooks/data-hook/use-exercise-data"
+import { useScheduledExerciseData } from "@/lib/hooks/data-hook/use-scheduled-exercise-data"
 
 
 interface ExerciseDetailDialogProps {
@@ -38,27 +38,27 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
   const {
     exercises,
     categories
-  } = useExerciseStore()
+  } = useExerciseData()
 
   // Use the user exercise preference store for favorites
   const {
     preferences: favoriteExercises,
     isLoading: favoritesLoading,
-    initializeStore: initializeFavorites
-  } = useUserExercisePreferenceStore()
+    refetch: initializeFavorites
+  } = useUserExercisePreferenceData()
 
   // Use the scheduled exercise store for scheduled exercises
   const {
     isLoading: scheduledLoading,
     error: scheduledError,
-    getExercisesForDate,
-    addScheduledExercise,
-    updateScheduledExercise,
-    deleteScheduledExercise
-  } = useScheduledExerciseStore();
+    selectors,
+    addExercise: addScheduledExercise,
+    updateExercise: updateScheduledExercise,
+    deleteExercise: deleteScheduledExercise
+  } = useScheduledExerciseData();
 
-  // Filter exercises for the current date
-  const dayExercises = getExercisesForDate(date)
+  // Filter exercises for the current date using selectors
+  const dayExercises = selectors.byDate(date)
 
   // Use the new exercise dialog store
   const {

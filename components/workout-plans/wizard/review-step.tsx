@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
-import { useExerciseStore } from "@/lib/stores/exercise-store";
+import { useExerciseData } from "@/lib/hooks/data-hook/use-exercise-data";
 import { StoreExercise } from "@/lib/types";
 
 interface ReviewStepProps {
@@ -40,7 +40,7 @@ const DAYS = [
 ];
 
 export function ReviewStep({ data }: ReviewStepProps) {
-  const { exercises } = useExerciseStore();
+  const { exercises } = useExerciseData();
 
   const getTotalExercises = () => {
     return Object.values(data.weeklySchedule).reduce((total, dayExercises) => total + dayExercises.length, 0);

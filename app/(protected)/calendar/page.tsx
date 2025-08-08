@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { format } from "date-fns";
 import {
   DndContext,
@@ -21,30 +21,27 @@ import { CalendarGrid } from "@/components/calendar/calendar-grid";
 import { CalendarLegend } from "@/components/calendar/calendar-legend";
 import { LoadingOverlay } from "@/components/calendar/loading-overlay";
 
-import { useExerciseStore } from "@/lib/stores/exercise-store";
-import { useScheduledExerciseStoreWithGeneration } from "@/lib/stores/scheduled-exercise-store";
+import { useScheduledExerciseData, useScheduledExerciseMutations } from "@/lib/hooks/data-hook/use-scheduled-exercise-data";
+import { useRescheduleExercise } from "@/lib/utils/queries/scheduled-exercises-queries";
+import { useWorkoutPlanData } from "@/lib/hooks/data-hook/use-workout-plan-data";
+import { scheduledExerciseUtils } from "@/lib/utils/scheduled-exercise-utils";
 import { scheduledExerciseService } from "@/lib/services/clients-service/scheduled-exercise-service";
-import { useWorkoutPlanStore } from "@/lib/stores/workout-plan-store";
-import { useCalendarStore, useCalendarData } from "@/lib/stores/calendar-store";
+import { useCalendarStore } from "@/lib/stores/calendar-store";
+import { useCalendarIntegration, useDateRange } from "@/lib/hooks/use-calendar-integration";
 import { useApiToast } from "@/lib/hooks/use-api-toast";
 import { isDateInSameWeek } from "@/lib/utils/calendar/date-utils";
 import { categorizeExercises } from "@/lib/utils/calendar/exercise-utils";
 import { useToast } from "@/lib/hooks/use-toast";
-
+import { useExerciseData } from "@/lib/hooks/data-hook/use-exercise-data";
 export default function CalendarPage() {
   // Hooks
   const { showErrorToast, showSuccessToast } = useApiToast();
   const { toast } = useToast();
+  
   // Access store state and actions
-  const {
-    exercises,
-    categories,
-    isLoading: exerciseLoading,
-    error: exerciseError,
-    initialized: exerciseInitialized,
-  } = useExerciseStore();
+  const {exercises, categories, isLoading: exercisesLoading, error: exercisesError, setFilters} = useExerciseData();
 
-  // Calendar store state and actions
+  // Consolidated calendar and exercise UI state
   const {
     currentDate,
     selectedDate,
@@ -55,6 +52,8 @@ export default function CalendarPage() {
     scopeDialogOpen,
     draggedExercise,
     pendingReschedule,
+    hasCheckedGeneration,
+    dateRange, 
     setCurrentDate,
     setSelectedDate,
     setCalendarView,
@@ -64,37 +63,41 @@ export default function CalendarPage() {
     setDraggedExercise,
     setPendingReschedule,
     setIsRescheduling,
-  } = useCalendarStore();
+    setHasCheckedGeneration,
+  } = useCalendarIntegration();
 
-  // Get pre-calculated calendar data
-  const { dateRange, days, formattedStartDate, formattedEndDate } =
-    useCalendarData();
-
+  // Data from React Query with enhanced selectors
   const {
-    scheduledExercises,
+    exercises: scheduledExercises,
+    selectors,
+    exercisesByDate,
+    stats,
     isLoading: scheduledLoading,
     error: scheduledError,
-    fetchExercisesForDateRange,
-    rescheduleExercise,
-    addScheduledExercise,
-    clearCache,
-    initialized: scheduledInitialized,
-    ensureExercisesGeneratedIfNeeded,
-  } = useScheduledExerciseStoreWithGeneration();
+    refetch: refetchScheduledExercises,
+  } = useScheduledExerciseData(dateRange);
 
+  
+  // Get mutations separately
+  const { addExercise: addScheduledExercise } = useScheduledExerciseMutations();
+
+  // Get reschedule mutation hook following the React Query pattern
+  const rescheduleExerciseMutation = useRescheduleExercise();
+
+  // Workout plan data (using new pattern)
   const {
     activePlan,
     isLoading: workoutPlanLoading,
     error: workoutPlanError,
     loadActivePlan,
     updatePlan,
-  } = useWorkoutPlanStore();
+  } = useWorkoutPlanData();
 
   // Combined loading and error states
-  const isLoading =
-    exerciseLoading || scheduledLoading || workoutPlanLoading || isRescheduling;
-  const error = exerciseError || scheduledError || workoutPlanError;
-  const initialized = exerciseInitialized && scheduledInitialized;
+  const isLoading = 
+    exercisesLoading || scheduledLoading || workoutPlanLoading || isRescheduling;
+  const error = exercisesError || scheduledError || workoutPlanError;
+  const initialized = !isLoading; // Simplified - React Query handles initialization
 
   // Load active workout plan on mount and check generation
   useEffect(() => {
@@ -103,40 +106,18 @@ export default function CalendarPage() {
     }
 
     // Check if exercises need to be generated (only once per session)
-    if (initialized) {
-      ensureExercisesGeneratedIfNeeded();
+    if (initialized && !hasCheckedGeneration) {
+      setHasCheckedGeneration(true);
+      // Generation logic would be handled by the server/API
     }
-  }, [initialized, activePlan]);
+  }, [initialized, activePlan, hasCheckedGeneration, loadActivePlan, setHasCheckedGeneration]);
 
-  // Load exercises for current date range
-  useEffect(() => {
-    // Only proceed if the store is initialized
-    if (!initialized) {
-      return;
-    }
+  // The date range is automatically handled by useScheduledExerciseData
+  // No manual fetching needed - React Query handles it automatically
 
-    if (!isLoading) {
-      // Use pre-formatted dates from our calendar data hook
-      fetchExercisesForDateRange(formattedStartDate, formattedEndDate).catch(
-        (error: any) => {
-          showErrorToast("Failed to load exercises", "Please try again later");
-          console.error("Error loading calendar exercises:", error);
-        }
-      );
-    }
-  }, [
-    currentDate,
-    calendarView,
-    isLoading,
-    initialized,
-    formattedStartDate,
-    formattedEndDate,
-  ]);
-
-  // Get exercises for a specific date
+  // Get exercises for a specific date using selectors
   const getExercisesForDate = (date: Date) => {
-    const dateStr = format(date, "yyyy-MM-dd");
-    return categorizeExercises(scheduledExercises, dateStr);
+    return selectors.byDate(date);
   };
 
   // Navigation handlers
@@ -226,7 +207,20 @@ export default function CalendarPage() {
     scope: "this-week" | "whole-plan" = "this-week"
   ) => {
     try {
-      await rescheduleExercise(exerciseId, newDate, scope);
+      await rescheduleExerciseMutation.mutateAsync({
+        exerciseId,
+        newDate,
+        scope,
+        options: {
+          workoutPlanStore: { activePlan, updatePlan },
+          onTemplateUpdate: async () => {
+            await loadActivePlan();
+          },
+          onCacheCleared: () => {
+            // Cache is automatically handled by React Query
+          }
+        }
+      });
       showSuccessToast("Exercise rescheduled successfully");
       // toast({
       //   title: "Exercise Rescheduled",
@@ -263,17 +257,35 @@ export default function CalendarPage() {
             sets: exercise.sets,
             reps: exercise.reps,
             weight: exercise.weight,
-            notes: exercise.notes,
+            notes: exercise.notes || '',
             completed: false,
+            userId: '', // Will be set by the API
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
           });
 
           // Now reschedule this temporary exercise with whole-plan scope
-          await rescheduleExercise(tempExercise._id, newDate, "whole-plan");
+          await rescheduleExerciseMutation.mutateAsync({
+            exerciseId: tempExercise._id,
+            newDate,
+            scope: "whole-plan",
+            options: {
+              workoutPlanStore: { activePlan, updatePlan },
+              onTemplateUpdate: async () => {
+                await loadActivePlan();
+              },
+              onCacheCleared: () => {
+                // Cache is automatically handled by React Query
+              }
+            }
+          });
           showSuccessToast(
             "Exercise moved permanently in workout plan template and all future weeks updated"
           );
         } else {
           // For this-week scope, create the override exercises directly
+          // Note: This specialized template conversion method still uses service directly
+          // as it's a complex operation that would need its own mutation hook
           await scheduledExerciseService.convertTemplateToScheduled(
             exercise,
             newDate,
@@ -281,15 +293,25 @@ export default function CalendarPage() {
           );
 
           // Refresh exercises to show the changes
-          await fetchExercisesForDateRange(
-            formattedStartDate,
-            formattedEndDate
-          );
+          await refetchScheduledExercises();
           showSuccessToast("Exercise moved for this week only");
         }
       } else {
-        // For regular scheduled exercises, use the store's reschedule method
-        await rescheduleExercise(exerciseId, newDate, scope);
+        // For regular scheduled exercises, use the mutation's reschedule method
+        await rescheduleExerciseMutation.mutateAsync({
+          exerciseId,
+          newDate,
+          scope,
+          options: {
+            workoutPlanStore: { activePlan, updatePlan },
+            onTemplateUpdate: async () => {
+              await loadActivePlan();
+            },
+            onCacheCleared: () => {
+              // Cache is automatically handled by React Query
+            }
+          }
+        });
         showSuccessToast(
           `Exercise rescheduled for ${
             scope === "whole-plan" ? "whole plan" : "this week only"

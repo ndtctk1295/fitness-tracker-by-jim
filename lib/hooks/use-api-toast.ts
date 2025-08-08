@@ -14,7 +14,7 @@ export const useApiToast = () => {
     toast({
       title: description ? message : 'Success',
       description: description || message,
-      className: 'bg-green-50 border-green-200',
+      className: 'bg-green-50 border-green-200 text-muted-foreground',
     });
   }, [toast]);
 
