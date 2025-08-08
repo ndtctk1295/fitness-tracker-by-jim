@@ -24,13 +24,13 @@ export const useExerciseFiltersStore = create<ExerciseState>((set) => ({
     activeOnly: true,
   },
   updateFilters: (newFilters) => {
-    console.log('[ExerciseFiltersStore] Filter update:', newFilters);
+    // Update filters silently
     return set((state) => ({
       filters: { ...state.filters, ...newFilters },
     }));
   },
   clearFilters: () => {
-    console.log('[ExerciseFiltersStore] Clearing filters');
+    // Clear filters silently
     return set({
       filters: { activeOnly: true },
     });

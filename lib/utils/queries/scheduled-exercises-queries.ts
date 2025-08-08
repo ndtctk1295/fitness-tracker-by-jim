@@ -21,6 +21,7 @@ const apiToStoreScheduledExercise = (exercise: ScheduledExercise) => ({
 
 export const useScheduledExercises = (startDate?: string, endDate?: string) => {
   const queryKey = startDate && endDate ? queryKeys.scheduledExercises.byRange(startDate, endDate) : queryKeys.scheduledExercises.list({});
+  
   return useQuery({
     queryKey,
     queryFn: async () => {
@@ -52,70 +53,27 @@ export const useAddScheduledExercise = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (exercise: Omit<ScheduledExercise, '_id'>) => scheduledExerciseService.create(exercise),
-    onMutate: async (newExercise) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.scheduledExercises.all() });
-      const previousData = queryClient.getQueriesData({ queryKey: queryKeys.scheduledExercises.all() });
-      const exerciseDate = newExercise.date;
-      
-      // Add optimistic update to byDate cache
-      queryClient.setQueryData(queryKeys.scheduledExercises.byDate(exerciseDate), (old: any[]) => 
-        old ? [...old, { ...newExercise, id: 'temp-' + Date.now() }] : [{ ...newExercise, id: 'temp-' + Date.now() }]
-      );
-      
-      return { previousData };
-    },
     onSuccess: (createdExercise, variables) => {
       const exerciseDate = variables.date;
       const normalizedExercise = apiToStoreScheduledExercise(createdExercise);
       
-      // Update byDate cache with real exercise
-      queryClient.setQueryData(queryKeys.scheduledExercises.byDate(exerciseDate), (old: any[]) => {
-        if (!old) return [normalizedExercise];
-        const filtered = old.filter(ex => !ex.id?.toString().startsWith('temp-'));
-        return [...filtered, normalizedExercise];
-      });
-      
-      // Update all list and range queries that might contain this exercise
-      queryClient.getQueriesData({ queryKey: queryKeys.scheduledExercises.all() }).forEach(([key, data]) => {
-        if (!Array.isArray(data)) return;
-        
-        const queryKey = key as readonly unknown[];
-        const queryType = queryKey[1];
-        
-        // Handle list queries (no date range)
-        if (queryType === 'list') {
-          const existingExercise = data.find((ex: any) => ex.id === normalizedExercise.id);
-          if (!existingExercise) {
-            queryClient.setQueryData(key, [...data, normalizedExercise]);
-          }
-        }
-        // Handle range queries (with start/end dates)
-        else if (queryType === 'range' && queryKey.length >= 4) {
-          const startDate = queryKey[2] as string;
-          const endDate = queryKey[3] as string;
+      // Update all matching queries with the real server data
+      queryClient.setQueriesData(
+        { queryKey: queryKeys.scheduledExercises.all() },
+        (oldData: any[] | undefined) => {
+          if (!oldData) return [normalizedExercise];
           
-          if (exerciseDate >= startDate && exerciseDate <= endDate) {
-            const existingExercise = data.find((ex: any) => ex.id === normalizedExercise.id);
-            if (!existingExercise) {
-              queryClient.setQueryData(key, [...data, normalizedExercise]);
-            }
-          }
+          // Check if exercise already exists to avoid duplicates
+          const exists = oldData.some(ex => ex.id === normalizedExercise.id);
+          if (exists) return oldData;
+          
+          return [...oldData, normalizedExercise];
         }
-      });
-      
-      // Invalidate all scheduled exercise queries to ensure consistency
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.scheduledExercises.all(),
-        exact: false
-      });
+      );
     },
-    onError: (error, variables, context) => {
-      if (context?.previousData) {
-        context.previousData.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-      }
-    },
+    onError: (error) => {
+      // Error handling without console logs
+    }
   });
 };
 

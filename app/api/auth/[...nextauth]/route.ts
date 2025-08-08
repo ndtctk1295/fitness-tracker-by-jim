@@ -60,8 +60,8 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials, req) {
-        console.log('[NextAuth] Authorizing credentials for:', credentials?.email);
-        console.log('[NextAuth] Using MongoDB URI:', process.env.MONGODB_URI);
+        // console.log('[NextAuth] Authorizing credentials for:', credentials?.email);
+        // console.log('[NextAuth] Using MongoDB URI:', process.env.MONGODB_URI);
         
         if (!credentials?.email || !credentials?.password) {
           console.log('[NextAuth] Missing credentials');
@@ -79,21 +79,21 @@ export const authOptions: NextAuthOptions = {
           const emailRateLimit = await rateLimitService.checkRateLimit(credentials.email, 'email');
           const ipRateLimit = await rateLimitService.checkRateLimit(clientIP as string, 'ip');
 
-          console.log('[NextAuth] Rate limit check - Email:', emailRateLimit, 'IP:', ipRateLimit);
+          // console.log('[NextAuth] Rate limit check - Email:', emailRateLimit, 'IP:', ipRateLimit);
 
           // If either email or IP is locked/delayed, reject
           if (emailRateLimit.isLocked) {
-            console.log('[NextAuth] Account locked:', emailRateLimit.message);
+            // console.log('[NextAuth] Account locked:', emailRateLimit.message);
             throw new Error('AccountLocked');
           }
 
           if (emailRateLimit.nextAllowedAttempt && emailRateLimit.nextAllowedAttempt > new Date()) {
-            console.log('[NextAuth] Rate limited:', emailRateLimit.message);
+            // console.log('[NextAuth] Rate limited:', emailRateLimit.message);
             throw new Error('RateLimited');
           }
 
           if (ipRateLimit.isLocked || (ipRateLimit.nextAllowedAttempt && ipRateLimit.nextAllowedAttempt > new Date())) {
-            console.log('[NextAuth] IP rate limited');
+            // console.log('[NextAuth] IP rate limited');
             throw new Error('RateLimited');
           }
 
@@ -101,7 +101,7 @@ export const authOptions: NextAuthOptions = {
           const user = await usersRepo.validateCredentials(credentials.email, credentials.password);
           
           if (!user) {
-            console.log('[NextAuth] User not found or invalid password for:', credentials.email);
+            // console.log('[NextAuth] User not found or invalid password for:', credentials.email);
             
             // Record failed attempt for both email and IP
             await rateLimitService.recordFailedAttempt(credentials.email, 'email');
@@ -200,7 +200,7 @@ export const authOptions: NextAuthOptions = {
     
     // Include user role and id in session and token
     async jwt({ token, user, trigger, session }) {
-      console.log('[NextAuth] JWT callback - User:', !!user, 'Token ID:', token.id, 'Trigger:', trigger);
+      // console.log('[NextAuth] JWT callback - User:', !!user, 'Token ID:', token.id, 'Trigger:', trigger);
       
       // Update token if user object is available (during sign in)
       if (user) {
@@ -220,7 +220,7 @@ export const authOptions: NextAuthOptions = {
     
     // Make role and id available on the client-side session
     async session({ session, token }) {
-      console.log('[NextAuth] Session callback - Token ID:', token.id, 'Session User:', !!session.user);
+      // console.log('[NextAuth] Session callback - Token ID:', token.id, 'Session User:', !!session.user);
       
       if (token && session.user) {
         session.user.role = token.role;

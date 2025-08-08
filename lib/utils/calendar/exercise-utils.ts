@@ -58,16 +58,10 @@ export function getWorkoutPlanTemplateExercises(
       String(scheduled.workoutPlanId).replace(/^[^a-z0-9]*/i, '') : 
       null;
     
-    // Debug log to troubleshoot workoutPlanId comparison
-    console.debug(`Comparing workoutPlanIds - Active: ${activePlanIdStr}, Scheduled: ${scheduledPlanIdStr}, Match: ${scheduledPlanIdStr === activePlanIdStr}`);
-    
     return scheduledPlanIdStr === activePlanIdStr && !scheduled.isHidden;
   });
   
   const hasScheduledExercisesFromPlan = activePlanScheduledExercises.length > 0;
-  
-  // Debug log to see if we're correctly detecting scheduled exercises
-  console.debug(`Date ${dateStr} - Found ${activePlanScheduledExercises.length} scheduled exercises for plan ${activePlanIdStr}`);
   
   // Check if this date is valid for the workout plan based on its mode and dates
   let isDateValidForPlan = false;

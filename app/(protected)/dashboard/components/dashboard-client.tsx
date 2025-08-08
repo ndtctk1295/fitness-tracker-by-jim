@@ -25,10 +25,7 @@ export default function DashboardClient({ session }: DashboardClientProps) {
   const router = useRouter();
   // const { data: sessionData } = useSession();
 
-  console.log('[DashboardClient] Component rendering with session:', {
-    userEmail: session?.user?.email,
-    userId: session?.user?.id
-  });
+  // Track session state without logging
   
   const { exercises, categories, isLoading: exercisesLoading } = useExerciseData();
   const { 
@@ -76,9 +73,8 @@ export default function DashboardClient({ session }: DashboardClientProps) {
     .join('')
     .toUpperCase();
   
-  // Handle navigation with debugging
+  // Handle navigation
   const handleNavigation = (path: string) => {
-    console.log('[DashboardClient] Navigating to:', path);
     navigateTo(router, path);
   };
   

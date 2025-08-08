@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { 
   useScheduledExercises, 
   useScheduledExercisesForDate, 
@@ -85,105 +85,110 @@ export function useScheduledExerciseData(dateRange?: { startDate?: string; endDa
   const deleteMutation = useDeleteScheduledExercise();
 
   // Enhanced selectors with comprehensive memoization
-  const selectors: ExerciseSelectors = useMemo(() => {
-    // Get current date strings
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const todayExercises = scheduledExerciseUtils.getExercisesForDate(exercises, today);
-    const thisWeekExercises = scheduledExerciseUtils.getThisWeekExercises(exercises);
-    const thisMonthExercises = scheduledExerciseUtils.getThisMonthExercises(exercises);
+  // const selectors: ExerciseSelectors = useMemo(() => {
+  //   // Get current date strings
+  //   const today = format(new Date(), 'yyyy-MM-dd');
+  //   const todayExercises = scheduledExerciseUtils.getExercisesForDate(exercises, today);
+  //   const thisWeekExercises = scheduledExerciseUtils.getThisWeekExercises(exercises);
+  //   const thisMonthExercises = scheduledExerciseUtils.getThisMonthExercises(exercises);
     
-    // Status-based data
-    const completed = scheduledExerciseUtils.getCompletedExercises(exercises);
-    const pending = scheduledExerciseUtils.getPendingExercises(exercises);
+  //   // Status-based data
+  //   const completed = scheduledExerciseUtils.getCompletedExercises(exercises);
+  //   const pending = scheduledExerciseUtils.getPendingExercises(exercises);
     
-    // Today-specific status
-    const completedToday = scheduledExerciseUtils.getCompletedExercises(todayExercises);
-    const pendingToday = scheduledExerciseUtils.getPendingExercises(todayExercises);
+  //   // Today-specific status
+  //   const completedToday = scheduledExerciseUtils.getCompletedExercises(todayExercises);
+  //   const pendingToday = scheduledExerciseUtils.getPendingExercises(todayExercises);
     
-    // Week-specific status  
-    const completedThisWeek = scheduledExerciseUtils.getCompletedExercises(thisWeekExercises);
-    const pendingThisWeek = scheduledExerciseUtils.getPendingExercises(thisWeekExercises);
+  //   // Week-specific status  
+  //   const completedThisWeek = scheduledExerciseUtils.getCompletedExercises(thisWeekExercises);
+  //   const pendingThisWeek = scheduledExerciseUtils.getPendingExercises(thisWeekExercises);
     
-    // Category breakdown
-    const categoryBreakdown = exercises.reduce((acc, exercise) => {
-      const categoryId = exercise.categoryId || 'uncategorized';
-      if (!acc[categoryId]) {
-        acc[categoryId] = { total: 0, completed: 0, completionRate: 0 };
-      }
-      acc[categoryId].total++;
-      if (exercise.completed) {
-        acc[categoryId].completed++;
-      }
-      acc[categoryId].completionRate = acc[categoryId].total > 0 
-        ? (acc[categoryId].completed / acc[categoryId].total) * 100 
-        : 0;
-      return acc;
-    }, {} as Record<string, { total: number; completed: number; completionRate: number; }>);
+  //   // Category breakdown
+  //   const categoryBreakdown = exercises.reduce((acc, exercise) => {
+  //     const categoryId = exercise.categoryId || 'uncategorized';
+  //     if (!acc[categoryId]) {
+  //       acc[categoryId] = { total: 0, completed: 0, completionRate: 0 };
+  //     }
+  //     acc[categoryId].total++;
+  //     if (exercise.completed) {
+  //       acc[categoryId].completed++;
+  //     }
+  //     acc[categoryId].completionRate = acc[categoryId].total > 0 
+  //       ? (acc[categoryId].completed / acc[categoryId].total) * 100 
+  //       : 0;
+  //     return acc;
+  //   }, {} as Record<string, { total: number; completed: number; completionRate: number; }>);
 
-    return {
-      // Date-based selectors (functions for dynamic date queries)
-      byDate: (date: Date | string) => scheduledExerciseUtils.getExercisesForDate(exercises, date),
-      byDateRange: (startDate: string, endDate: string) => 
-        scheduledExerciseUtils.getExercisesByDateRange(exercises, startDate, endDate),
+  //   return {
+  //     // Date-based selectors (functions for dynamic date queries)
+  //     byDate: (date: Date | string) => scheduledExerciseUtils.getExercisesForDate(exercises, date),
+  //     byDateRange: (startDate: string, endDate: string) => 
+  //       scheduledExerciseUtils.getExercisesByDateRange(exercises, startDate, endDate),
       
-      // Pre-computed date selectors (cached for performance)
-      today: todayExercises,
-      thisWeek: thisWeekExercises,
-      thisMonth: thisMonthExercises,
+  //     // Pre-computed date selectors (cached for performance)
+  //     today: todayExercises,
+  //     thisWeek: thisWeekExercises,
+  //     thisMonth: thisMonthExercises,
       
-      // Status-based selectors
-      completed,
-      pending,
-      byCategory: (categoryId: string) => 
-        scheduledExerciseUtils.getExercisesByCategory(exercises, categoryId),
+  //     // Status-based selectors
+  //     completed,
+  //     pending,
+  //     byCategory: (categoryId: string) => 
+  //       scheduledExerciseUtils.getExercisesByCategory(exercises, categoryId),
       
-      // Utility selectors
-      findById: (id: string) => scheduledExerciseUtils.findExerciseById(exercises, id),
-      sortedByDate: (ascending = false) => 
-        scheduledExerciseUtils.sortExercisesByDate(exercises, ascending),
+  //     // Utility selectors
+  //     findById: (id: string) => scheduledExerciseUtils.findExerciseById(exercises, id),
+  //     sortedByDate: (ascending = false) => 
+  //       scheduledExerciseUtils.sortExercisesByDate(exercises, ascending),
       
-      // Advanced combined selectors
-      completedToday,
-      pendingToday,
-      completedThisWeek,
-      pendingThisWeek,
+  //     // Advanced combined selectors
+  //     completedToday,
+  //     pendingToday,
+  //     completedThisWeek,
+  //     pendingThisWeek,
       
-      // Comprehensive stats
-      stats: {
-        // Overall stats
-        total: exercises.length,
-        completed: completed.length,
-        pending: pending.length,
-        completionRate: exercises.length > 0 ? (completed.length / exercises.length) * 100 : 0,
+  //     // Comprehensive stats
+  //     stats: {
+  //       // Overall stats
+  //       total: exercises.length,
+  //       completed: completed.length,
+  //       pending: pending.length,
+  //       completionRate: exercises.length > 0 ? (completed.length / exercises.length) * 100 : 0,
         
-        // Today stats
-        todayStats: {
-          total: todayExercises.length,
-          completed: completedToday.length,
-          pending: pendingToday.length,
-          completionRate: todayExercises.length > 0 
-            ? (completedToday.length / todayExercises.length) * 100 
-            : 0,
-        },
+  //       // Today stats
+  //       todayStats: {
+  //         total: todayExercises.length,
+  //         completed: completedToday.length,
+  //         pending: pendingToday.length,
+  //         completionRate: todayExercises.length > 0 
+  //           ? (completedToday.length / todayExercises.length) * 100 
+  //           : 0,
+  //       },
         
-        // Week stats
-        weekStats: {
-          total: thisWeekExercises.length,
-          completed: completedThisWeek.length,
-          pending: pendingThisWeek.length,
-          completionRate: thisWeekExercises.length > 0 
-            ? (completedThisWeek.length / thisWeekExercises.length) * 100 
-            : 0,
-        },
+  //       // Week stats
+  //       weekStats: {
+  //         total: thisWeekExercises.length,
+  //         completed: completedThisWeek.length,
+  //         pending: pendingThisWeek.length,
+  //         completionRate: thisWeekExercises.length > 0 
+  //           ? (completedThisWeek.length / thisWeekExercises.length) * 100 
+  //           : 0,
+  //       },
         
-        // Category breakdown
-        categoryBreakdown,
-      },
-    };
-  }, [exercises]);
+  //       // Category breakdown
+  //       categoryBreakdown,
+  //     },
+  //   };
+  // }, [exercises]);
+   const selectors = {
+    byDate: useCallback((date: Date) => {
+      return exercises.filter(ex => ex.date === format(date, 'yyyy-MM-dd'))
+    }, [exercises]) // This makes it reactive to exercises changes
+  }
 
   // Legacy computed values for backward compatibility
-  const stats = selectors.stats;
+  // const stats = selectors.stats;
   const exercisesByDate = useMemo(() => 
     scheduledExerciseUtils.groupExercisesByDate(exercises), 
     [exercises]
@@ -199,7 +204,7 @@ export function useScheduledExerciseData(dateRange?: { startDate?: string; endDa
     selectors,
     
     // Legacy API (backward compatibility)
-    stats,
+    // stats,
     exercisesByDate,
     
     // Actions

@@ -59,7 +59,8 @@ export const scheduledExerciseService = {
   },
     /**
    * Create a new scheduled exercise
-   */    create: async (scheduledExercise: { 
+   */    
+  create: async (scheduledExercise: { 
     exerciseId: string;
     categoryId: string;
     workoutPlanId?: string;

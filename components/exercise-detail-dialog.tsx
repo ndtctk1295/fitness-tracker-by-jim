@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { format, isBefore, startOfDay } from "date-fns"
 import { Plus, Edit, Trash2, X, Save, Loader2, Timer } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -26,6 +26,7 @@ import { useToast } from "@/lib/hooks/use-toast"
 import { useExerciseDialogStore } from "@/lib/stores/exercise-dialog-store"
 import { useExerciseData } from "@/lib/hooks/data-hook/use-exercise-data"
 import { useScheduledExerciseData } from "@/lib/hooks/data-hook/use-scheduled-exercise-data"
+import { useCalendarIntegration } from "@/lib/hooks/use-calendar-integration"
 
 
 interface ExerciseDetailDialogProps {
@@ -47,18 +48,27 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
     refetch: initializeFavorites
   } = useUserExercisePreferenceData()
 
-  // Use the scheduled exercise store for scheduled exercises
+  // Get the current date range to ensure we use the same query as calendar
+  const { dateRange } = useCalendarIntegration();
+
+  // Use the scheduled exercise store for scheduled exercises with same date range as calendar
   const {
     isLoading: scheduledLoading,
     error: scheduledError,
     selectors,
+    exercises: allExercises,
     addExercise: addScheduledExercise,
     updateExercise: updateScheduledExercise,
     deleteExercise: deleteScheduledExercise
-  } = useScheduledExerciseData();
+  } = useScheduledExerciseData(dateRange);
 
   // Filter exercises for the current date using selectors
   const dayExercises = selectors.byDate(date)
+
+  // Track when exercises change to debug React re-renders
+  useEffect(() => {
+    // Silent effect for tracking exercises changes
+  }, [allExercises, date]);
 
   // Use the new exercise dialog store
   const {
@@ -150,12 +160,14 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
   const handleAddExercise = async () => {
     if (selectedExerciseId && sets && reps) {
       try {
-        console.log('🏋️ [ExerciseDialog] Adding exercise for date:', date);
         const exerciseData = await addExercise(date, weightUnit);
         if (exerciseData) {
-          console.log('🏋️ [ExerciseDialog] Exercise created, calling addScheduledExercise:', exerciseData);
           await addScheduledExercise(exerciseData);
-          console.log('🏋️ [ExerciseDialog] addScheduledExercise completed');
+          
+          // Check if the exercise appears immediately with fresh data
+          setTimeout(() => {
+            // Success - exercise added
+          }, 100);
         }
       } catch (error) {
         console.error('Error adding exercise:', error);

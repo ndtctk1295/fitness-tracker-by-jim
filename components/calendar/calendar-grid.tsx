@@ -21,14 +21,12 @@ export function CalendarGrid({
   activePlan,
   onSelectDate
 }: CalendarGridProps) {
-  // Debug when scheduledExercises changes
+  // Track scheduled exercises changes
   useEffect(() => {
-    console.log('📅 [CalendarGrid] Scheduled exercises updated:', scheduledExercises.length);
-    // Only log August 8th exercises for our test
-    const aug8Exercises = scheduledExercises.filter(ex => ex.date === '2025-08-08');
-    if (aug8Exercises.length > 0) {
-      console.log('📅 [CalendarGrid] August 8th exercises:', aug8Exercises);
-    }
+    // Silent effect for tracking exercises changes
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const todayExercises = scheduledExercises.filter(ex => ex.date === today);
+    // Exercises tracked silently
   }, [scheduledExercises]);
   
   // Get state from calendar store
@@ -84,9 +82,6 @@ export function CalendarGrid({
           }),
           template: templateExercises,
         };
-
-        // Debug log for this specific date
-        console.debug(`Calendar date ${dateStr} - Plan exercises: ${dayExercises.scheduled.length}, Template exercises: ${dayExercises.template.length}, Has scheduled from plan: ${hasScheduledExercisesFromPlan}`);
 
         // Combine all exercise types for display - prioritizing scheduled exercises over templates
         const allDayExercises = [
