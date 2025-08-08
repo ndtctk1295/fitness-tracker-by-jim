@@ -4,6 +4,7 @@
 import AppLayout from '@/components/layouts/app-layout';
 import { StoreWrapper } from '@/components/shared/store-wrapper';
 import { ClientOnly } from '@/components/shared/client-only';
+import { LoadingScreens } from '@/components/loading-modal';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 // This layout wraps all protected routes that require authentication
@@ -28,7 +29,7 @@ export default function ProtectedLayout({
   }));
   
   return (
-    <ClientOnly fallback={<div>Loading...</div>}>
+    <ClientOnly fallback={<LoadingScreens.App />}>
       <QueryClientProvider client={queryClient}>
         <AppLayout>
           <StoreWrapper>
