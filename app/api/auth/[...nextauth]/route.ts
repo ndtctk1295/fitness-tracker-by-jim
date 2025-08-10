@@ -35,6 +35,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     role?: string;
     id?: string;
+  name?: string;
   }
 }
 
@@ -70,10 +71,10 @@ export const authOptions: NextAuthOptions = {
 
         try {
           // Get client IP for additional rate limiting
-          const clientIP = req?.headers?.['x-forwarded-for'] || 
-                           req?.headers?.['x-real-ip'] || 
-                           req?.connection?.remoteAddress || 
-                           'unknown';
+          const anyReq = req as any;
+          const xff = (anyReq?.headers?.['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim();
+          const realIp = anyReq?.headers?.['x-real-ip'] as string | undefined;
+          const clientIP = xff || realIp || 'unknown';
 
           // Check rate limits for both email and IP
           const emailRateLimit = await rateLimitService.checkRateLimit(credentials.email, 'email');
@@ -206,13 +207,25 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        // Persist name on sign in so session has it consistently
+  token.name = user.name ?? token.name;
         // console.log('[NextAuth] Updated token with user data:', { id: token.id, role: token.role });
       }
 
       // Handle role updates if using session update
-      if (trigger === 'update' && session?.user?.role) {
-        token.role = session.user.role;
-        // console.log('[NextAuth] Updated token role from session update:', token.role);
+      if (trigger === 'update') {
+        // Accept both nested session.user and top-level fields depending on how update() was called
+        if (session?.user?.role) {
+          token.role = session.user.role;
+        }
+        if (session?.user?.name) {
+          token.name = session.user.name;
+        }
+        // Some apps call update({ name: '...' }) at the root
+        if ((session as any)?.name) {
+          token.name = (session as any).name;
+        }
+        // console.log('[NextAuth] Updated token from session.update:', { role: token.role, name: (token as any).name });
       }
 
       return token;
@@ -225,6 +238,10 @@ export const authOptions: NextAuthOptions = {
       if (token && session.user) {
         session.user.role = token.role;
         session.user.id = token.id;
+        // Ensure session name follows token updates (e.g., after session.update)
+        if (token.name) {
+          session.user.name = token.name;
+        }
         // console.log('[NextAuth] Enhanced session with:', {
         //   id: session.user.id,
         //   email: session.user.email,

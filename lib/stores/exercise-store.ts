@@ -37,8 +37,6 @@ export const useExerciseFiltersStore = create<ExerciseState>((set) => ({
   },
 }));
 
-// Re-export exercise utilities for convenience (imported from utils)
-export { exerciseUtils } from '@/lib/utils/exercise-utils';
 
 // Legacy hook for backward compatibility (deprecated - use queries directly)
 export const useExerciseStore = () => {

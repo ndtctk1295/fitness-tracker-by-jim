@@ -191,7 +191,7 @@ export default function WorkoutPlanDetailPage() {
       </div>
 
       {/* Plan Info Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -217,6 +217,22 @@ export default function WorkoutPlanDetailPage() {
             </div>
           </CardContent>
         </Card>
+
+        {plan.endDate && (
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="text-sm text-muted-foreground">Ends</div>
+                  <div className="font-medium">
+                    {format(new Date(plan.endDate), 'MMM dd, yyyy')}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         
         <Card>
           <CardContent className="p-4">

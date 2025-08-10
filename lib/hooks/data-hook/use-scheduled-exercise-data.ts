@@ -11,6 +11,7 @@ import {
 } from '@/lib/utils/queries/scheduled-exercises-queries';
 import { scheduledExerciseUtils } from '@/lib/utils/scheduled-exercise-utils';
 import { format } from 'date-fns';
+import { useCalendarIntegration } from '../use-calendar-integration';
 
 // Enhanced selector interface for better TypeScript support
 interface ExerciseSelectors {
@@ -71,13 +72,14 @@ interface ExerciseSelectors {
  * @returns Complete data interface with exercises, selectors, and actions
  */
 export function useScheduledExerciseData(dateRange?: { startDate?: string; endDate?: string }) {
-  // Direct React Query usage - no store wrapper needed
+  // Gate fetching until calendar store (persisted state) is hydrated
+  const { isHydrated } = useCalendarIntegration();
   const { 
     data: exercises = [], 
     isLoading, 
     error, 
     refetch 
-  } = useScheduledExercises(dateRange?.startDate, dateRange?.endDate);
+  } = useScheduledExercises(dateRange?.startDate, dateRange?.endDate, { enabled: isHydrated });
 
   // Mutations
   const addMutation = useAddScheduledExercise();
@@ -182,17 +184,14 @@ export function useScheduledExerciseData(dateRange?: { startDate?: string; endDa
   //   };
   // }, [exercises]);
    const selectors = {
-    byDate: useCallback((date: Date) => {
-      return exercises.filter(ex => ex.date === format(date, 'yyyy-MM-dd'))
+    byDate: useCallback((date: Date | string) => {
+      const dateStr = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
+      return exercises.filter(ex => ex.date === dateStr)
     }, [exercises]) // This makes it reactive to exercises changes
   }
 
   // Legacy computed values for backward compatibility
   // const stats = selectors.stats;
-  const exercisesByDate = useMemo(() => 
-    scheduledExerciseUtils.groupExercisesByDate(exercises), 
-    [exercises]
-  );
 
   return {
     // Core data
@@ -205,7 +204,6 @@ export function useScheduledExerciseData(dateRange?: { startDate?: string; endDa
     
     // Legacy API (backward compatibility)
     // stats,
-    exercisesByDate,
     
     // Actions
     refetch,

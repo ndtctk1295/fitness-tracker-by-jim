@@ -46,6 +46,8 @@ interface CalendarStoreState {
   draggedExercise: any | null;
   pendingReschedule: PendingReschedule | null;
   lastFetchInfo: LastFetchInfo;
+  // Hydration state
+  isHydrated: boolean;
   
   // Methods
   setCurrentDate: (date: Date) => void;
@@ -57,6 +59,7 @@ interface CalendarStoreState {
   setDraggedExercise: (exercise: any | null) => void;
   setPendingReschedule: (data: PendingReschedule | null) => void;
   setIsRescheduling: (isRescheduling: boolean) => void;
+  setHydrated: (hydrated: boolean) => void;
   
   // Navigation methods
   goToNextDate: () => void;
@@ -93,6 +96,7 @@ export const useCalendarStore = create<CalendarStoreState>()(
         date: 0,
         view: 'month'
       },
+  isHydrated: false,
       
       // State setters
       setCurrentDate: (date: Date) => set({ currentDate: date }),
@@ -104,6 +108,7 @@ export const useCalendarStore = create<CalendarStoreState>()(
       setDraggedExercise: (exercise: any | null) => set({ draggedExercise: exercise }),
       setPendingReschedule: (data: PendingReschedule | null) => set({ pendingReschedule: data }),
       setIsRescheduling: (isRescheduling: boolean) => set({ isRescheduling }),
+  setHydrated: (hydrated: boolean) => set({ isHydrated: hydrated }),
       
       // Navigation methods
       goToNextDate: () => {
@@ -177,16 +182,30 @@ export const useCalendarStore = create<CalendarStoreState>()(
         calendarView: state.calendarView,
         calendarDisplayMode: state.calendarDisplayMode
       }),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          // Ensure dates are properly converted back to Date objects
-          if (state.currentDate && !(state.currentDate instanceof Date)) {
-            state.currentDate = new Date(state.currentDate);
+      onRehydrateStorage: () => (state, error) => {
+        // This runs after rehydration finishes
+          if (state) {
+            // Ensure dates are properly converted back to Date objects
+            if (state.currentDate && !(state.currentDate instanceof Date)) {
+              state.currentDate = new Date(state.currentDate);
+            }
+            if (state.selectedDate && !(state.selectedDate instanceof Date)) {
+              state.selectedDate = new Date(state.selectedDate);
+            }
           }
-          if (state.selectedDate && !(state.selectedDate instanceof Date)) {
-            state.selectedDate = new Date(state.selectedDate);
-          }
-        }
+          // Mark hydration complete to allow dependent queries to enable
+          state && (state as any).isHydrated !== undefined;
+          // Since we cannot call set here directly, use a microtask to update after hydration
+          queueMicrotask(() => {
+            try {
+              // Access store and set hydrated flag
+              const store = useCalendarStore.getState();
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              useCalendarStore.setState({ isHydrated: true });
+            } catch {}
+          });
+        
       },
     }
   )

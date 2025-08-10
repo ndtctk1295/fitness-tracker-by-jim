@@ -31,7 +31,7 @@ export default function SignIn() {
     networkError: 'A network error occurred. Please check your connection and try again.',
     title: 'Signin failed',
     CredentialsSignin: "Invalid Email or Password.",
-    TooManyAttempts: "Too many failed attempts. Your account has been temporarily locked for security.",
+    TooManyAttempts: "Too many failed attempts. Please wait a moment before try again.",
     default: "An error occurred. Please try again.",
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,7 +69,7 @@ export default function SignIn() {
         } else {
           toast({
             title: errorMessage.title,
-            description: errorMessage.default,
+            description: result.error,
             variant: 'destructive',
           });
         }
@@ -151,11 +151,11 @@ export default function SignIn() {
                 </button>
               </div>
             </div>
-            { errorMessage.CredentialsSignin && (
+            {/* { errorMessage.CredentialsSignin && (
               <p className="text-sm text-destructive" data-testid="Sign-in failed">
                 {errorMessage.CredentialsSignin}
               </p>
-            )}
+            )} */}
             <Button type="submit" className="w-full" disabled={isLoading} data-testid="login-button">
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>

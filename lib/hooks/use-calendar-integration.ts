@@ -15,6 +15,7 @@ export const useCalendarIntegration = () => {
     selectedDate,
     calendarView,
     calendarDisplayMode,
+  isHydrated,
     dialogOpen,
     scopeDialogOpen,
     draggedExercise,
@@ -59,6 +60,7 @@ export const useCalendarIntegration = () => {
     selectedDate,
     calendarView,
     calendarDisplayMode,
+  isHydrated,
     
     // Dialog and interaction states
     dialogOpen,

@@ -70,8 +70,7 @@ export default function CalendarPage() {
   const {
     exercises: scheduledExercises,
     selectors,
-    exercisesByDate,
-    stats,
+    // stats,
     isLoading: scheduledLoading,
     error: scheduledError,
     refetch: refetchScheduledExercises,

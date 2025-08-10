@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/lib/hooks/use-toast';
+import { useUpdateUserProfile } from '@/lib/utils/queries/user-queries';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 
@@ -48,13 +49,8 @@ export default function ProfilePage() {
   const { data: session, update: updateSession, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const updateProfileMutation = useUpdateUserProfile();
   
-  // Redirect based on authentication status
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      redirectTo(router, '/auth/signin', { callbackUrl: '/profile' });
-    }
-  }, [status, router]);
 
   // Initialize form with user data from session
   const form = useForm<ProfileFormValues>({
@@ -73,30 +69,17 @@ export default function ProfilePage() {
   }, [session, form]);
 
   const onSubmit = async (data: ProfileFormValues) => {
+    // event?.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch('/api/auth/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await updateProfileMutation.mutateAsync({ name: data.name });
 
-      const result = await response.json();
+      // Update session data locally for immediate UI consistency
+  // Send minimal payload; callbacks will propagate to JWT/session
+  await updateSession({ name: data.name });
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to update profile');
-      }
-
-      // Update session data
-      await updateSession({
-        ...session,
-        user: {
-          ...session?.user,
-          name: data.name,
-        },
-      });
+  // If any Server Components read the session, refresh them
+  router.refresh();
 
       toast({
         title: 'Profile updated',

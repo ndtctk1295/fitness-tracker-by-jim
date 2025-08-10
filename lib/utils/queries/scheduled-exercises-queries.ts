@@ -19,7 +19,7 @@ const apiToStoreScheduledExercise = (exercise: ScheduledExercise) => ({
   isHidden: exercise.isHidden || false,
 });
 
-export const useScheduledExercises = (startDate?: string, endDate?: string) => {
+export const useScheduledExercises = (startDate?: string, endDate?: string, options?: { enabled?: boolean }) => {
   const queryKey = startDate && endDate ? queryKeys.scheduledExercises.byRange(startDate, endDate) : queryKeys.scheduledExercises.list({});
   
   return useQuery({
@@ -32,12 +32,13 @@ export const useScheduledExercises = (startDate?: string, endDate?: string) => {
       const exercises = await scheduledExerciseService.getAll();
       return exercises.map(apiToStoreScheduledExercise);
     },
-    staleTime: 5 * 60 * 1000,
+  staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
+  enabled: options?.enabled !== undefined ? options.enabled : true,
   });
 };
 
-export const useScheduledExercisesForDate = (date: string) => {
+export const useScheduledExercisesForDate = (date: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: queryKeys.scheduledExercises.byDate(date),
     queryFn: async () => {
@@ -46,6 +47,7 @@ export const useScheduledExercisesForDate = (date: string) => {
     },
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
+  enabled: options?.enabled !== undefined ? options.enabled : true,
   });
 };
 
@@ -56,20 +58,39 @@ export const useAddScheduledExercise = () => {
     onSuccess: (createdExercise, variables) => {
       const exerciseDate = variables.date;
       const normalizedExercise = apiToStoreScheduledExercise(createdExercise);
-      
-      // Update all matching queries with the real server data
-      queryClient.setQueriesData(
-        { queryKey: queryKeys.scheduledExercises.all() },
-        (oldData: any[] | undefined) => {
-          if (!oldData) return [normalizedExercise];
-          
-          // Check if exercise already exists to avoid duplicates
-          const exists = oldData.some(ex => ex.id === normalizedExercise.id);
-          if (exists) return oldData;
-          
-          return [...oldData, normalizedExercise];
+
+      // 1) Update byDate cache for the specific day
+      queryClient.setQueryData(queryKeys.scheduledExercises.byDate(exerciseDate), (old: any[] | undefined) => {
+        const list = Array.isArray(old) ? old : [];
+        const exists = list.some((ex) => ex.id === normalizedExercise.id);
+        return exists ? list : [...list, normalizedExercise];
+      });
+
+      // 2) Update any byRange caches that include this date
+      const all = queryClient.getQueriesData({ queryKey: queryKeys.scheduledExercises.all() });
+      all.forEach(([key, data]) => {
+        if (!Array.isArray(key)) return;
+        // key shape: ['scheduledExercises', 'range', startDate, endDate]
+        if (key[0] === 'scheduledExercises' && key[1] === 'range') {
+          const start = String(key[2]);
+          const end = String(key[3]);
+          if (exerciseDate >= start && exerciseDate <= end) {
+            const list = Array.isArray(data) ? (data as any[]) : [];
+            const exists = list.some((ex) => ex.id === normalizedExercise.id);
+            if (!exists) {
+              queryClient.setQueryData(key, [...list, normalizedExercise]);
+            }
+          }
         }
-      );
+        // key shape: ['scheduledExercises', 'list', filters]
+        if (key[0] === 'scheduledExercises' && key[1] === 'list') {
+          const list = Array.isArray(data) ? (data as any[]) : [];
+          const exists = list.some((ex) => ex.id === normalizedExercise.id);
+          if (!exists) {
+            queryClient.setQueryData(key, [...list, normalizedExercise]);
+          }
+        }
+      });
     },
     onError: (error) => {
       // Error handling without console logs

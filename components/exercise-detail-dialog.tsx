@@ -226,6 +226,9 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
   // Check if the selected date is in the past
   const isPastDate = isBefore(startOfDay(date), startOfDay(new Date()));
 
+  // Check if the selected date is today
+  const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-7xl max-h-[98vh] flex flex-col" data-testid="exercise-detail-dialog">
@@ -289,22 +292,26 @@ export function ExerciseDetailDialog({ date, open, onOpenChange }: ExerciseDetai
               <>
                 {dayExercises.length > 0 && (
                   <div className="flex justify-between items-center mb-4">
-                    <Link href="/timer" onClick={() => onOpenChange(false)}>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="bg-primary text-primary-foreground hover:bg-primary/90"
-                        data-testid="start-timer-link"
-                      >
-                        <Timer className="h-4 w-4 mr-1" />
-                        Start Workout
-                      </Button>
-                    </Link>
+                    {/* Only show Start Workout button for today */}
+                    {isToday && (
+                      <Link href="/timer" onClick={() => onOpenChange(false)}>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="bg-primary text-primary-foreground hover:bg-primary/90"
+                          data-testid="start-timer-link"
+                        >
+                          <Timer className="h-4 w-4 mr-1" />
+                          Start Workout
+                        </Button>
+                      </Link>
+                    )}
                     <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => setDeleteDialogState({ isOpen: true, exerciseId: "", deleteAll: true })}
                       disabled={localIsLoading}
+                      className={!isToday ? "ml-auto" : ""}
                     >
                       <Trash2 className="h-4 w-4 mr-1" />
                       Clear All Exercises

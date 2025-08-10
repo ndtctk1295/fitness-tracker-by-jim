@@ -108,10 +108,10 @@ export function MainNav() {
             <Package2 className="h-6 w-6" /> {/* ShadCN example icon */}
             <span>Fitness Tracker</span>
           </Link>
-          <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
+          {/* <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
             <Bell className="h-4 w-4" />
             <span className="sr-only">Toggle notifications</span>
-          </Button>
+          </Button> */}
         </div>
       </SidebarHeader>
       <SidebarContent>
